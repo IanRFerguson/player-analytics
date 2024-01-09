@@ -2,7 +2,7 @@ from prefect import flow
 from parsons.google.google_bigquery import GoogleBigQuery
 from parsons import Table
 import datetime
-from src.utils import scrape_basketball_reference, clean_player_data
+from src.utils import get_boxscore_data, clean_player_data
 
 #####
 
@@ -13,7 +13,7 @@ def get_data_from_source():
     """
 
     date_yesterday = datetime.date.today() - datetime.timedelta(days=1)
-    player_data = scrape_basketball_reference(target=date_yesterday)
+    player_data = get_boxscore_data(target=date_yesterday)
 
     if player_data:
         player_data = clean_player_data(player_data=player_data)

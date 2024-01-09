@@ -5,4 +5,5 @@ logs/
 
 ### File types
 *.pyc*
-prefect__test_wf*
+*ipynb*
+*prefect__test_wf*
