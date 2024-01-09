@@ -1,0 +1,8 @@
+### Subdirectories
+creds/
+venv/
+logs/
+
+### File types
+*.pyc*
+prefect__test_wf*
