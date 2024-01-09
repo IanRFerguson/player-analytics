@@ -1,7 +1,8 @@
 from prefect import flow
 from parsons.google.google_bigquery import GoogleBigQuery
-from datetime import datetime
-import pytz
+from parsons import Table
+import datetime
+from src.utils import scrape_basketball_reference, clean_player_data
 
 #####
 
@@ -10,10 +11,16 @@ def get_data_from_source():
     """
     Scrapes and cleans NYK player data
     """
-    pass
+
+    date_yesterday = datetime.date.today() - datetime.timedelta(days=1)
+    player_data = scrape_basketball_reference(target=date_yesterday)
+
+    if player_data:
+        player_data = clean_player_data(player_data=player_data)
+        return player_data
 
 
-def load_data_to_warehouse(bq: GoogleBigQuery):
+def load_data_to_warehouse(bq: GoogleBigQuery, nyk_data: Table):
     """
     Loads cleaned data into BigQuery
     """
@@ -23,7 +30,10 @@ def load_data_to_warehouse(bq: GoogleBigQuery):
 
 @flow(log_prints=True)
 def run(bq: GoogleBigQuery):
-    pass
+    nyk_data = get_data_from_source()
+
+    if nyk_data:
+        load_data_to_warehouse(bq=bq, nyk_data=nyk_data)
 
 
 #####

@@ -7,8 +7,10 @@ This analytics pipeline is composed of the following steps:
   * We want the following raw models
     * Player stats per night
     * Player stats on the season (averages)
+  
 * **LOAD**
   * The resulting tabular data is loaded into `BigQuery` as a raw table
+  
 * **TRANSFORM**
   * Data is aggregated and transofmred via `dbt`
   * We want to represent the following as cleaned `dbt` models
