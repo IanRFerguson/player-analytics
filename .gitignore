@@ -2,6 +2,7 @@
 creds/
 venv/
 logs/
+.vscode/
 
 ### File types
 *.pyc*
