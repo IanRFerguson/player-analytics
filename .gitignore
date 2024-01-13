@@ -8,3 +8,4 @@ logs/
 *.pyc*
 *ipynb*
 *prefect__test_wf*
+*.env*

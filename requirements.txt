@@ -1,4 +1,4 @@
+parsons==3.0.0
+nba_api
+prefect>=2.0.0
 pandas
-parsons>=2.0.0
-nba_api==1.4.1
-prefect==2.14.13
