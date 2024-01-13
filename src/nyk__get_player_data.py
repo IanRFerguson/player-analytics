@@ -2,7 +2,8 @@ from prefect import flow
 from parsons.google.google_bigquery import GoogleBigQuery
 from parsons import Table
 import datetime
-from src.utils import get_all_boxscore_data
+from src.api import get_all_boxscore_data
+from src.utilities.cli import cli
 
 #####
 

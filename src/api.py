@@ -1,11 +1,10 @@
 import json
-import os
 import pandas as pd
 from parsons import Table
 from parsons.google.google_bigquery import GoogleBigQuery
 from nba_api.stats.endpoints.teamgamelog import TeamGameLog
 from config import RAW_BQ_DATASET, STAT_TABLE_CONFIG, TEAM_ID
-from logger import logger
+from utilities.logger import logger
 
 #####
 
@@ -86,7 +85,8 @@ def process(
     index: int, id_: str, bq: GoogleBigQuery, full_refresh: bool, error_manifest: list
 ):
     """
-    TODO: Fill this in
+    Iteratively hits stat-specific API endpoints and writes the responses
+    to BigQuery tables
     """
 
     logger.info(f"Processing id={id_}")
