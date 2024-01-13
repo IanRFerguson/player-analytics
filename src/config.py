@@ -12,21 +12,21 @@ STAT_TABLE_CONFIG = {
     "box_score__advanced": {
         "raw_table_name": "box_score__advanced",
         "api_endpoint": BoxScoreAdvancedV3,
-        "team_id_field": "",
+        "team_id_field": "teamId",
     },
     "box_score__scoring": {
         "raw_table_name": "box_score__scoring",
         "api_endpoint": BoxScoreScoringV2,
-        "team_id_field": "teamId",
+        "team_id_field": "TEAM_ID",
     },
     "box_score__player_track": {
         "raw_table_name": "box_sore__player_track",
         "api_endpoint": BoxScorePlayerTrackV2,
-        "team_id_field": "",
+        "team_id_field": "TEAM_ID",
     },
     "box_score__traditional": {
         "raw_table_name": "box_score__traditional",
         "api_endpoint": BoxScoreTraditionalV2,
-        "team_id_field": "",
+        "team_id_field": "TEAM_ID",
     },
 }
