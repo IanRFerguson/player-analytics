@@ -10,3 +10,4 @@ logs/
 *prefect__test_wf*
 *.env*
 service_accounts/*.json
+*DS_Store*
