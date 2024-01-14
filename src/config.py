@@ -6,7 +6,8 @@ from nba_api.stats.endpoints.boxscoretraditionalv2 import BoxScoreTraditionalV2
 #####
 
 RAW_BQ_DATASET = "raw__nyk_data"
-TEAM_ID = "1610612752"
+LOG_TABLE = "_etl_log"
+NYK_ID = "1610612752"
 
 STAT_TABLE_CONFIG = {
     "box_score__advanced": {

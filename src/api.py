@@ -1,16 +1,17 @@
 import os
 import json
+import datetime
 import pandas as pd
 from parsons import Table
 from parsons.google.google_bigquery import GoogleBigQuery
 from nba_api.stats.endpoints.teamgamelog import TeamGameLog
-from config import RAW_BQ_DATASET, STAT_TABLE_CONFIG, TEAM_ID
+from config import RAW_BQ_DATASET, STAT_TABLE_CONFIG, NYK_ID, LOG_TABLE
 from utilities.logger import logger
 
 #####
 
 
-def get_game_metadata(team_id: str = TEAM_ID):
+def get_game_metadata(team_id: str = NYK_ID):
     """`
     Hits the NBA API and returns dataframe of all games that
     have already been played this season
@@ -39,7 +40,15 @@ def get_all_boxscore_data(
     returns `None`
     """
 
+    log_table = f"{dataset}.{LOG_TABLE}"
     all_game_metadata = get_game_metadata()
+    build_tables(
+        data=all_game_metadata,
+        raw_dataset=dataset,
+        raw_table_name="game_log",
+        if_exists="drop",
+        bq=bq,
+    )
 
     if not full_refresh:
         all_game_metadata = all_game_metadata[
@@ -50,16 +59,25 @@ def get_all_boxscore_data(
             logger.info(
                 f"{len(all_game_metadata)} rows returned via API call for target {target}..."
             )
+            return 
 
-            return None
+    elif full_refresh and bq.table_exists(table_name=log_table):
+        # Truncate the log table to start fresh
+        bq.delete_table(table_name=log_table)
 
     ###
 
-    game_ids = [x for x in all_game_metadata["Game_ID"]]
+    all_errors = []
+    existing_game_ids = get_ids_from_log_table(log_table=log_table, bq=bq)
+    game_ids = [x for x in all_game_metadata["Game_ID"] if x not in existing_game_ids]
+
+    if len(game_ids) == 0:
+        logger.info("No new games to log")
+        return
+    
     logger.debug(f"Identified {len(game_ids)} Game IDs to process...")
     logger.info(f"Processing {len(game_ids)} games...")
 
-    all_errors = []
     for ix, id_ in enumerate(game_ids):
         process(
             index=ix,
@@ -68,14 +86,13 @@ def get_all_boxscore_data(
             full_refresh=full_refresh,
             error_manifest=all_errors,
             dataset=dataset,
+            log_table=log_table,
         )
 
     if all_errors:
         logger.error(f"{len(all_errors)} builds failed")
-
         for e in all_errors:
             logger.error(e)
-
         raise
 
     else:
@@ -87,6 +104,7 @@ def build_tables(
     raw_table_name: str,
     raw_dataset: str,
     bq: GoogleBigQuery,
+    if_exists: str = "append",
 ):
     # Full dataset.table name
     table_name = f"{raw_dataset}.{raw_table_name}"
@@ -100,7 +118,7 @@ def build_tables(
     bq.copy(
         tbl=tbl,
         table_name=table_name,
-        if_exists="append",
+        if_exists=if_exists,
         tmp_gcs_bucket=os.environ["DEV_BUCKET"],
     )
 
@@ -111,6 +129,7 @@ def process(
     bq: GoogleBigQuery,
     full_refresh: bool,
     error_manifest: list,
+    log_table: str,
     dataset: str = RAW_BQ_DATASET,
 ):
     """
@@ -142,7 +161,7 @@ def process(
         try:
             # Use API to build dataframe
             data = endpoint(id_).get_data_frames()[0]
-            data = data[data[team_id_field].astype(str) == TEAM_ID].reset_index(
+            data = data[data[team_id_field].astype(str) == NYK_ID].reset_index(
                 drop=True
             )
             logger.debug("Successfully built dataframes")
@@ -167,3 +186,36 @@ def process(
             error_manifest.append(
                 {"game_id": id_, "type": build_type, "stage": "build"}
             )
+
+    write_to_log_table(log_table=log_table, game_id=id_, bq=bq)
+
+
+def write_to_log_table(log_table: str, game_id: str, bq: GoogleBigQuery):
+    """
+    Writes ELT metadata to log table
+    """
+
+    meta_ = Table([{"id": game_id, "_load_timestamp": datetime.datetime.now()}])
+    bq.copy(
+        tbl=meta_,
+        table_name=log_table,
+        if_exists="append",
+        tmp_gcs_bucket=os.environ["DEV_BUCKET"],
+    )
+
+
+def get_ids_from_log_table(log_table: str, bq: GoogleBigQuery) -> list:
+    """
+    Queries log table and returns list of logged game ids
+    """
+
+    logger.debug(f"Checking ids against {log_table}...")
+
+    if bq.table_exists(table_name=log_table):
+        query = f"SELECT DISTINCT id FROM {log_table}"
+        result = bq.query(query, return_values=True)
+
+        return [x for x in result["id"]]
+
+    logger.debug(f"{log_table} doesn't exist, returning empty array...")
+    return []
