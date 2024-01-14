@@ -46,7 +46,7 @@ def get_all_boxscore_data(
         data=all_game_metadata,
         raw_dataset=dataset,
         raw_table_name="game_log",
-        if_exists="truncate",
+        if_exists="drop",
         bq=bq,
     )
 
@@ -59,8 +59,7 @@ def get_all_boxscore_data(
             logger.info(
                 f"{len(all_game_metadata)} rows returned via API call for target {target}..."
             )
-
-            return None
+            return 
 
     elif full_refresh and bq.table_exists(table_name=log_table):
         # Truncate the log table to start fresh
@@ -71,6 +70,11 @@ def get_all_boxscore_data(
     all_errors = []
     existing_game_ids = get_ids_from_log_table(log_table=log_table, bq=bq)
     game_ids = [x for x in all_game_metadata["Game_ID"] if x not in existing_game_ids]
+
+    if len(game_ids) == 0:
+        logger.info("No new games to log")
+        return
+    
     logger.debug(f"Identified {len(game_ids)} Game IDs to process...")
     logger.info(f"Processing {len(game_ids)} games...")
 
@@ -87,10 +91,8 @@ def get_all_boxscore_data(
 
     if all_errors:
         logger.error(f"{len(all_errors)} builds failed")
-
         for e in all_errors:
             logger.error(e)
-
         raise
 
     else:
@@ -206,6 +208,8 @@ def get_ids_from_log_table(log_table: str, bq: GoogleBigQuery) -> list:
     """
     Queries log table and returns list of logged game ids
     """
+
+    logger.debug(f"Checking ids against {log_table}...")
 
     if bq.table_exists(table_name=log_table):
         query = f"SELECT DISTINCT id FROM {log_table}"
