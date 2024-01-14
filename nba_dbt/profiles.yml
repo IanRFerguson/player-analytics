@@ -4,7 +4,7 @@ nba_analytics:
     db:
       type: bigquery
       method: service-account
-      keyfile: ../service_accounts/nba-player-analytics-4153526c6e83.json
+      keyfile: ../service_accounts/gcp_load_creds.json
       project: nba-player-analytics
       dataset: nba_dbt
       threads: 4
