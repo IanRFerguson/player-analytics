@@ -1,0 +1,25 @@
+{
+    "[python]": {
+        "editor.formatOnType": true,
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "ms-python.black-formatter"
+    },
+
+    "flake8.args": [
+        "--max-line-length=120",
+        "--ignore=E501,E226,W503"
+    ],
+
+    "[sql]": {
+        "editor.defaultFormatter": "dorzey.vscode-sqlfluff",
+        "editor.formatOnSave": false
+    },
+    "sqlfluff.experimental.format.executeInTerminal": true,
+    "sqlfluff.dialect": "redshift",
+    "sqlfluff.linter.run": "onSave",
+    "sqlfluff.format.arguments": [
+        "--FIX-EVEN-UNPARSABLE"
+    ],
+
+    "window.zoomLevel": 0
+}
