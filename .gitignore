@@ -9,3 +9,4 @@ logs/
 *ipynb*
 *prefect__test_wf*
 *.env*
+service_accounts/*.json
