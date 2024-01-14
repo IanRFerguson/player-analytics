@@ -78,6 +78,9 @@ def get_all_boxscore_data(
 
         raise
 
+    else:
+        logger.info(f"{len(game_ids)} games processed successfully")
+
 
 def build_tables(
     data: pd.DataFrame,

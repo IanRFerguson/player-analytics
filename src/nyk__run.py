@@ -1,23 +1,35 @@
+import os
+import datetime
 from prefect import flow
 from parsons.google.google_bigquery import GoogleBigQuery
-import datetime
 from src.api import get_all_boxscore_data
 from src.utilities.cli import cli
 from src.utilities.logger import logger
-import os
 from config import RAW_BQ_DATASET
 
 #####
 
 
-@flow(log_prints=True)
-def run(bq: GoogleBigQuery, full_refresh: bool, dataset: str = RAW_BQ_DATASET):
+def generate_target():
+    """
+    Creates formatted datetime string representing yesterday's date
+    """
+
     # Get formatted date from yesterday
     today_ = datetime.date.today()
+
+    # Format date string
     yesterday_ = (today_ - datetime.timedelta(days=1)).strftime("%b %d, %Y").upper()
 
+    return yesterday_
+
+
+@flow(log_prints=True)
+def run(bq: GoogleBigQuery, full_refresh: bool, dataset: str = RAW_BQ_DATASET):
+    target = generate_target()
+
     get_all_boxscore_data(
-        bq=bq, full_refresh=full_refresh, target=yesterday_, dataset=dataset
+        bq=bq, full_refresh=full_refresh, target=target, dataset=dataset
     )
 
 
