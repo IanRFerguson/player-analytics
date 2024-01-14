@@ -1,5 +1,6 @@
 import os
 import datetime
+import logging
 from prefect import flow
 from parsons.google.google_bigquery import GoogleBigQuery
 from api import get_all_boxscore_data
@@ -62,6 +63,10 @@ if __name__ == "__main__":
     if DEBUG:
         logger.setLevel(level=10)
         logger.debug("Running logger in debug...")
+    else:
+        # If we're running the logger normally we don't really need all
+        # the logs we get from Parsons
+        logging.getLogger("parsons.google.google_cloud_storage").setLevel(level=30)
 
     ###
 
