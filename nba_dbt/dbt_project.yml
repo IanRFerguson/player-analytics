@@ -1,0 +1,30 @@
+name: 'nba_analytics'
+version: '1.0.0'
+config-version: 2
+
+profile: 'nba_analytics'
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+clean-targets:         
+  - "target"
+  - "dbt_packages"
+
+models:
+  nba_analytics:
+    base:
+      +materialized: view
+      +schema: nba_dbt__base
+    staging:
+      +materialized: view
+      +schema: nba_dbt__staging
+    summary:
+      +materialized: table
+
+vars:
+  db_name: nba-player-analytics

@@ -1,0 +1,11 @@
+nba_analytics:
+  target: db
+  outputs:
+    db:
+      type: bigquery
+      method: service-account
+      keyfile: ../service_accounts/nba-player-analytics-4153526c6e83.json
+      project: nba-player-analytics
+      dataset: nba_dbt
+      threads: 4
+      location: us
