@@ -20,7 +20,7 @@ STAT_TABLE_CONFIG = {
         "team_id_field": "TEAM_ID",
     },
     "box_score__player_track": {
-        "raw_table_name": "box_sore__player_track",
+        "raw_table_name": "box_score__player_track",
         "api_endpoint": BoxScorePlayerTrackV2,
         "team_id_field": "TEAM_ID",
     },

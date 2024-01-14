@@ -1,3 +1,4 @@
+import os
 import json
 import pandas as pd
 from parsons import Table
@@ -8,25 +9,30 @@ from utilities.logger import logger
 
 #####
 
-logger.info("Hello world")
-
 
 def get_game_metadata(team_id: str = TEAM_ID):
-    """
+    """`
     Hits the NBA API and returns dataframe of all games that
     have already been played this season
     """
 
     # Get all previous games
-    games_ = json.loads(TeamGameLog(1610612752).get_json())["resultSets"][0]
+    games_ = json.loads(TeamGameLog(team_id).get_json())["resultSets"][0]
+    logger.debug("Successfully queried team game log...")
 
     # Shape into tabular data
     data_ = pd.DataFrame(games_["rowSet"], columns=games_["headers"])
+    logger.debug("Cast game data to table...")
 
     return data_
 
 
-def get_all_boxscore_data(target: str, bq: GoogleBigQuery, full_refresh: bool = False):
+def get_all_boxscore_data(
+    target: str,
+    bq: GoogleBigQuery,
+    full_refresh: bool = False,
+    dataset: str = RAW_BQ_DATASET,
+):
     """
     Retrives player data for a given date. If the Knicks
     did not play a game on this date, the function
@@ -41,9 +47,17 @@ def get_all_boxscore_data(target: str, bq: GoogleBigQuery, full_refresh: bool = 
         ].reset_index(drop=True)
 
         if not len(all_game_metadata) == 1:
+            logger.info(
+                f"{len(all_game_metadata)} rows returned via API call for target {target}..."
+            )
+
             return None
 
+    ###
+
     game_ids = [x for x in all_game_metadata["Game_ID"]]
+    logger.debug(f"Identified {len(game_ids)} Game IDs to process...")
+    logger.info(f"Processing {len(game_ids)} games...")
 
     all_errors = []
     for ix, id_ in enumerate(game_ids):
@@ -53,6 +67,7 @@ def get_all_boxscore_data(target: str, bq: GoogleBigQuery, full_refresh: bool = 
             bq=bq,
             full_refresh=full_refresh,
             error_manifest=all_errors,
+            dataset=dataset,
         )
 
     if all_errors:
@@ -72,17 +87,28 @@ def build_tables(
 ):
     # Full dataset.table name
     table_name = f"{raw_dataset}.{raw_table_name}"
+    logger.debug(f"Processing {raw_dataset}.{raw_table_name}...")
 
     # Convert DataFrame to Parsons table
     # TODO: Should be easy to clean this up
     tbl = Table().from_dataframe(dataframe=data)
 
     # Copy data to BigQuery
-    bq.copy(tbl=tbl, table_name=table_name, if_exists="append")
+    bq.copy(
+        tbl=tbl,
+        table_name=table_name,
+        if_exists="append",
+        tmp_gcs_bucket=os.environ["DEV_BUCKET"],
+    )
 
 
 def process(
-    index: int, id_: str, bq: GoogleBigQuery, full_refresh: bool, error_manifest: list
+    index: int,
+    id_: str,
+    bq: GoogleBigQuery,
+    full_refresh: bool,
+    error_manifest: list,
+    dataset: str = RAW_BQ_DATASET,
 ):
     """
     Iteratively hits stat-specific API endpoints and writes the responses
@@ -99,27 +125,42 @@ def process(
         team_id_field = STAT_TABLE_CONFIG[build_type]["team_id_field"]
 
         # Drop the table if desired (but only in the first loop)
-        if full_refresh and index == 0:
+        if (
+            full_refresh
+            and index == 0
+            and bq.table_exists(f"{dataset}.{raw_table_name}")
+        ):
             logger.debug(f"Attempting to drop table {raw_table_name}...")
-            bq.delete_table(table_name=f"{RAW_BQ_DATASET}.{raw_table_name}")
-            logger.info(f"Successfully dropped table {RAW_BQ_DATASET}.{raw_table_name}")
+            bq.delete_table(table_name=f"{dataset}.{raw_table_name}")
+            logger.info(f"Successfully dropped table {dataset}.{raw_table_name}")
+
+        ###
 
         try:
             # Use API to build dataframe
             data = endpoint(id_).get_data_frames()[0]
-            data = data[data[team_id_field] == TEAM_ID].reset_index(drop=True)
+            data = data[data[team_id_field].astype(str) == TEAM_ID].reset_index(
+                drop=True
+            )
             logger.debug("Successfully built dataframes")
 
+        except Exception as e:
+            logger.error(f"Build type {build_type} failed for id={id_} at DATA STAGE")
+            logger.error(e)
+            error_manifest.append({"game_id": id_, "type": build_type, "stage": "data"})
+
+        ###
+
+        try:
             # Write data to BigQuery
             build_tables(
-                data=data,
-                raw_dataset=RAW_BQ_DATASET,
-                raw_table_name=raw_table_name,
-                full_refresh=full_refresh,
+                data=data, raw_dataset=dataset, raw_table_name=raw_table_name, bq=bq
             )
             logger.debug("Successfully wrote to BigQuery")
 
         except Exception as e:
-            logger.error(f"Build type {build_type} failed for id={id_}")
+            logger.error(f"Build type {build_type} failed for id={id_} at BUILD STAGE")
             logger.error(e)
-            error_manifest.append({"id": id_, "type": build_type})
+            error_manifest.append(
+                {"game_id": id_, "type": build_type, "stage": "build"}
+            )
