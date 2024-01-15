@@ -32,7 +32,7 @@ WITH
             {{ easy_alias('turnoverRatio', 'turnover_ratio') }},
             {{ easy_alias('effectiveFieldGoalPercentage', 'effective_field_goal_percentage') }},
             {{ easy_alias('trueShootingPercentage', 'true_shooting_percentage') }},
-            {{ easy_alias('usagePercentage', 'uasge_percentage') }},
+            {{ easy_alias('usagePercentage', 'usage_percentage') }},
             {{ easy_alias('estimatedUsagePercentage', 'usage_percentage__estimated') }},
             {{ easy_alias('estimatedPace', 'pace__estimated') }},
             {{ easy_alias('pace', 'pace') }},

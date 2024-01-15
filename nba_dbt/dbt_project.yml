@@ -19,12 +19,11 @@ models:
   nba_analytics:
     base:
       +materialized: view
-      +schema: nba_dbt__base
     staging:
-      +materialized: view
-      +schema: nba_dbt__staging
+      +materialized: table
     summary:
       +materialized: table
+      +schema: __clean
 
 vars:
   db_name: nba-player-analytics

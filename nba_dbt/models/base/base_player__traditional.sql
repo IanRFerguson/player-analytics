@@ -27,7 +27,7 @@ WITH
             {{ easy_alias('AST', 'assists') }},
             {{ easy_alias('STL', 'steals') }},
             {{ easy_alias('BLK', 'blocks') }},
-            {{ easy_alias('`TO`', 'to_') }}
+            {{ easy_alias('`TO`', 'turnovers') }},
             {{ easy_alias('PF', 'personal_fouls') }},
             {{ easy_alias('PTS', 'points') }},
             {{ easy_alias('PLUS_MINUS', 'plus_minus') }}
