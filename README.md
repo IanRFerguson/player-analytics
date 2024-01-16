@@ -1,6 +1,6 @@
 # NBA Player Analytics
 
-<img src=".local/nba_dbt.png" width=75%>
+<img src=".local/nba_dbt.png" width=50%>
 
 This analytics pipeline is composed of the following steps:
 
@@ -40,3 +40,10 @@ python src/run.py --full-refresh --local
 # Kick the main function off via Prefect
 python src/run.py
 ```
+
+## Running Checklist
+- [ ] Python API is successfully writing to BigQuery project 
+- [ ] Clean dbt models (base + staging) are well defined and run without test failures
+- [ ] Summary dbt models accurately join tables together to offer insights about players and games
+- [ ] Prefect workflow set up to run on a daily cadence
+- [ ] Core infrastructure is managed via Terraform
