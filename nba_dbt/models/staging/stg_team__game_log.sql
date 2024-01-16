@@ -6,7 +6,12 @@ WITH
             game_id,
             game_date,
             matchup,
-            SPLIT(matchup, '@')[1] AS opponent,
+            CASE
+                WHEN LOWER(matchup) LIKE '%vs%' THEN 'HOME'
+                WHEN LOWER(matchup) LIKE '%@%' THEN 'AWAY'
+                ELSE NULL
+            END AS game_location,
+            {{ matchup_opponent('matchup' )}} AS opponent,
             outcome__win_loss,
             outcome__net_wins,
             outcome__net_losses,
