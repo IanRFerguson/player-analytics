@@ -1,0 +1,8 @@
+version: 2
+
+models:
+  - name: base_player__advanced
+  - name: base_player__player_track
+  - name: base_player__scoring
+  - name: base_player__traditional
+  - name: base_team__game_log

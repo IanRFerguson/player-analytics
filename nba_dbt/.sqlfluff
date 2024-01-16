@@ -1,0 +1,82 @@
+[sqlfluff]
+dialect = bigquery
+templater = dbt
+exclude_rules = LT01,LT05,LT09,LT12,LT13,AL07,ST02,ST06,ST07,AM03,ST01
+# Excluded rule details:
+# LT01: Inappropriate spacing (implementation TBD)
+# LT05: Maximum line length
+# LT09: Select targets should be on a new line unless there is only one
+# LT12: Files must end with a single trailing newline
+# LT13: Files must not begin with newlines or whitespace
+# AL07: Avoid table aliases in from clauses and join conditions
+# ST02: Unnecessary CASE statement
+# ST06: Select wildcards then simple targets before calculations and aggregates
+# ST07: Prefer specifying join keys instead of using USING
+# AM03: Order by all columns
+# ST01: Redundant ELSE NULL in CASE expression
+
+
+[sqlfluff:templater:jinja]
+apply_dbt_builtins = True
+
+[sqlfluff:templater:dbt]
+project_dir = ./
+profiles_dir = ./
+
+[sqlfluff:rules:capitalisation.keywords]
+# Keywords Capitalization
+capitalisation_policy = upper
+
+[sqlfluff:rules:capitalisation.functions]
+# Function Name Capitalization
+extended_capitalisation_policy = upper
+
+[sqlfluff:rules:capitalisation.literals]
+# Null & Boolean Literals
+capitalisation_policy = upper
+
+[sqlfluff:rules:structure.subquery]
+# Prefer CTEs
+forbid_subquery_in = both
+
+[sqlfluff:rules:capitalisation.types]
+# Data Type Capitalization
+extended_capitalisation_policy = upper
+
+[sqlfluff:rules:aliasing.length]
+min_alias_length = 4
+[sqlfluff:rules:aliasing.table]
+aliasing = explicit
+[sqlfluff:rules:aliasing.column]
+aliasing = explicit
+[sqlfluff:rules:aliasing.expression]
+aliasing = explicit
+[sqlfluff:rules:aliasing.unique.table]
+aliasing = explicit
+
+[sqlfluff:layout:type:comma]
+line_position = trailing
+
+[sqlfluff:rules:layout.select_targets]
+# LT09
+wildcard_policy = multiple
+
+[sqlfluff:indentation]
+# LT02
+indent_unit = space
+tab_space_size = 4
+template_blocks_indent = True
+indented_joins = False
+indented_ctes = True
+indented_using_on = True
+indented_on_contents = True
+indented_then = True
+indented_then_contents = False
+allow_implicit_indents = True
+
+[sqlfluff:rules:references.quoting]
+ignore_words = type
+
+[sqlfluff:rules:ambiguous.column_references]
+# AM06
+group_by_and_order_by_style = consistent

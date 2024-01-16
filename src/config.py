@@ -1,3 +1,4 @@
+import os
 from nba_api.stats.endpoints.boxscoreadvancedv3 import BoxScoreAdvancedV3
 from nba_api.stats.endpoints.boxscorescoringv2 import BoxScoreScoringV2
 from nba_api.stats.endpoints.boxscoreplayertrackv2 import BoxScorePlayerTrackV2
@@ -5,9 +6,12 @@ from nba_api.stats.endpoints.boxscoretraditionalv2 import BoxScoreTraditionalV2
 
 #####
 
-RAW_BQ_DATASET = "raw__nyk_data"
+TEAM_CONFIG = {"nyk": {"dataset": "raw__nyk_data", "id": "1610612752"}}
+
+RAW_BQ_DATASET = TEAM_CONFIG[os.environ["TEAM_ABBREVIATION"]]["dataset"]
+NYK_ID = TEAM_CONFIG[os.environ["TEAM_ABBREVIATION"]]["id"]
+
 LOG_TABLE = "_etl_log"
-NYK_ID = "1610612752"
 
 STAT_TABLE_CONFIG = {
     "box_score__advanced": {

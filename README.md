@@ -35,8 +35,8 @@ Once the container builds, you can run an interactive shell and execute the sour
 bash dev__interactive_shell.sh
 
 # Run the main function "locally"
-python src/nyk__run.py --full-refresh --local
+python src/run.py --full-refresh --local
 
 # Kick the main function off via Prefect
-python src/nyk__run.py
+python src/run.py
 ```

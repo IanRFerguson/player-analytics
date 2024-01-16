@@ -1,0 +1,37 @@
+version: 2
+
+models:
+  - name: stg_player__advanced
+    columns:
+      - name: advanced_unique_id
+        tests:
+          - unique
+          - not_null
+  
+  - name: stg_player__player_track
+    columns:
+      - name: player_track_unique_id
+        tests:
+          - unique
+          - not_null
+  
+  - name: stg_player__scoring
+    columns:
+      - name: scoring_unique_id
+        tests:
+          - unique
+          - not_null
+
+  - name: stg_player__traditional
+    columns:
+      - name: traditional_unique_id
+        tests:
+          - unique
+          - not_null
+
+  - name: stg_team__game_log
+    columns:
+      - name: game_log_unique_id
+        tests:
+          - unique
+          - not_null

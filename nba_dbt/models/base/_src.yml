@@ -1,0 +1,12 @@
+version: 2
+
+sources:
+  - name: raw_nyk
+    database: "{{ var('db_name') }}"
+    schema: raw__nyk_data
+    tables:
+      - name: box_score__advanced
+      - name: box_score__player_track
+      - name: box_score__scoring
+      - name: box_score__traditional
+      - name: game_log
