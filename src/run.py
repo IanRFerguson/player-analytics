@@ -1,6 +1,7 @@
 import os
 import datetime
 import logging
+import pytz
 from prefect import flow, task
 from parsons.google.google_bigquery import GoogleBigQuery
 from api import get_all_boxscore_data
@@ -17,7 +18,7 @@ def generate_target():
     """
 
     # Get formatted date from yesterday
-    today_ = datetime.date.today()
+    today_ = datetime.datetime.now(tz=pytz.timezone("US/Eastern"))
 
     # Format date string
     yesterday_ = (today_ - datetime.timedelta(days=1)).strftime("%b %d, %Y").upper()
@@ -83,12 +84,12 @@ if __name__ == "__main__":
 
     if LOCAL:
         bq = GoogleBigQuery(app_creds=os.environ["GCP_CREDS"])
-        run(bq=bq, full_refresh=FULL_REFRESH, dataset=DATASET)
+        run.fn(bq=bq, full_refresh=FULL_REFRESH, dataset=DATASET)
 
     else:
         kickoff.serve(
             name="nyk-player-data",
-            tags=["onboarding"],
+            tags=["analytics"],
             parameters={"full_refresh": FULL_REFRESH, "dataset": DATASET},
             interval=60,
         )
