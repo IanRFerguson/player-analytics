@@ -1,7 +1,7 @@
 import os
 import datetime
 import logging
-from prefect import flow
+from prefect import flow, task
 from parsons.google.google_bigquery import GoogleBigQuery
 from api import get_all_boxscore_data
 from utilities.cli import cli
@@ -38,6 +38,7 @@ def kickoff(full_refresh: bool, dataset: str):
     run(bq=bq, full_refresh=full_refresh, dataset=dataset)
 
 
+@task
 def run(bq: GoogleBigQuery, full_refresh: bool, dataset: str = RAW_BQ_DATASET):
     target = generate_target()
 
@@ -49,7 +50,6 @@ def run(bq: GoogleBigQuery, full_refresh: bool, dataset: str = RAW_BQ_DATASET):
 #####
 
 if __name__ == "__main__":
-
     # Get command line args
     args_ = cli()
 
