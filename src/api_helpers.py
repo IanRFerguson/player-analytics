@@ -83,8 +83,8 @@ def get_all_boxscore_data(
             logger.error(e)
         raise
 
-    else:
-        logger.info(f"{len(game_ids)} games processed successfully")
+    logger.info(f"{len(game_ids)} games processed successfully")
+    return True
 
 
 def build_tables(
