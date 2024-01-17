@@ -4,3 +4,4 @@ prefect>=2.0.0
 pandas
 dbt-bigquery
 sqlfluff
+python-dotenv
