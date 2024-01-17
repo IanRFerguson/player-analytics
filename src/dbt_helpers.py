@@ -11,7 +11,7 @@ def set_dbt_path():
     os.chdir(dbt_path)
 
 
-def dbt_models(target: str = "+path:models/staging"):
+def dbt_models(target: str = "path:models/base+"):
     call_ = f"dbt build --select {target}".split(" ")
     logger.debug(f"Attempting to run dbt from {os.getcwd()}")
     logger.debug(f"Call: {call_}")
@@ -25,7 +25,7 @@ def dbt_deps():
     subprocess.run(call_)
 
 
-def build_dbt(target: str = "+path:models/staging"):
+def build_dbt(target: str = "path:models/base+"):
     set_dbt_path()
     dbt_deps()
     dbt_models(target=target)
