@@ -1,7 +1,6 @@
 parsons==3.0.0
 nba_api
 prefect>=2.0.0
-pandas
-dbt-bigquery
-sqlfluff
-python-dotenv
+pandas>=1.5.0
+dbt-bigquery>=1.5.0
+python-dotenv==1.0.0
