@@ -6,16 +6,10 @@ from api_helpers import get_all_boxscore_data
 from dbt_helpers import build_dbt
 from utilities.cli import cli
 from utilities.logger import logger
+from utilities.environment import set_dataset, set_environment
 from config import RAW_BQ_DATASET
 
 #####
-
-
-def set_dataset(testing: bool):
-    if testing:
-        return f"{RAW_BQ_DATASET}__test"
-
-    return RAW_BQ_DATASET
 
 
 @flow(log_prints=False)
@@ -40,7 +34,7 @@ def run_dbt():
 #####
 
 if __name__ == "__main__":
-    # Get command line args
+    set_environment()
     args_ = cli()
 
     # Parse
@@ -48,7 +42,7 @@ if __name__ == "__main__":
     FULL_REFRESH = args_.full_refresh
     TESTING = args_.test
     DEBUG = args_.debug
-    DATASET = set_dataset(TESTING)
+    DATASET = set_dataset(TESTING, default_dataset=RAW_BQ_DATASET)
 
     if DEBUG:
         logger.setLevel(level=10)
@@ -67,8 +61,7 @@ if __name__ == "__main__":
         "Testing": TESTING,
         "Destination Dataset": DATASET,
     }
-    for key in config.keys():
-        logger.info(f"{key.upper()}:\t{config[key]}")
+    logger.info(config)
 
     ###
 
