@@ -29,7 +29,6 @@ def get_game_metadata(team_id: str = NYK_ID):
 
 
 def get_all_boxscore_data(
-    target: str,
     bq: GoogleBigQuery,
     full_refresh: bool = False,
     dataset: str = RAW_BQ_DATASET,
@@ -50,18 +49,7 @@ def get_all_boxscore_data(
         bq=bq,
     )
 
-    if not full_refresh:
-        all_game_metadata = all_game_metadata[
-            all_game_metadata["GAME_DATE"] == target
-        ].reset_index(drop=True)
-
-        if not len(all_game_metadata) == 1:
-            logger.info(
-                f"{len(all_game_metadata)} rows returned via API call for target {target}..."
-            )
-            return 
-
-    elif full_refresh and bq.table_exists(table_name=log_table):
+    if full_refresh and bq.table_exists(table_name=log_table):
         # Truncate the log table to start fresh
         bq.delete_table(table_name=log_table)
 
@@ -74,7 +62,7 @@ def get_all_boxscore_data(
     if len(game_ids) == 0:
         logger.info("No new games to log")
         return
-    
+
     logger.debug(f"Identified {len(game_ids)} Game IDs to process...")
     logger.info(f"Processing {len(game_ids)} games...")
 

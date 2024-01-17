@@ -1,7 +1,5 @@
 import os
-import datetime
 import logging
-import pytz
 from prefect import flow, task
 from parsons.google.google_bigquery import GoogleBigQuery
 from api import get_all_boxscore_data
@@ -10,20 +8,6 @@ from utilities.logger import logger
 from config import RAW_BQ_DATASET
 
 #####
-
-
-def generate_target():
-    """
-    Creates formatted datetime string representing yesterday's date
-    """
-
-    # Get formatted date from yesterday
-    today_ = datetime.datetime.now(tz=pytz.timezone("US/Eastern"))
-
-    # Format date string
-    yesterday_ = (today_ - datetime.timedelta(days=1)).strftime("%b %d, %Y").upper()
-
-    return yesterday_
 
 
 def set_dataset(testing: bool):
@@ -41,11 +25,7 @@ def kickoff(full_refresh: bool, dataset: str):
 
 @task
 def run(bq: GoogleBigQuery, full_refresh: bool, dataset: str = RAW_BQ_DATASET):
-    target = generate_target()
-
-    get_all_boxscore_data(
-        bq=bq, full_refresh=full_refresh, target=target, dataset=dataset
-    )
+    get_all_boxscore_data(bq=bq, full_refresh=full_refresh, dataset=dataset)
 
 
 #####
@@ -78,7 +58,8 @@ if __name__ == "__main__":
         "Testing": TESTING,
         "Destination Dataset": DATASET,
     }
-    logger.info(config)
+    for key in config.keys():
+        logger.info(f"{key.upper()}:\t{config[key]}")
 
     ###
 
