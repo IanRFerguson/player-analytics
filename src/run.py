@@ -1,12 +1,12 @@
 import os
 import logging
 from prefect import flow, task
-from parsons.google.google_bigquery import GoogleBigQuery
 from api_helpers import get_all_boxscore_data
 from dbt_helpers import build_dbt
 from utilities.cli import cli
 from utilities.logger import logger
 from utilities.environment import set_dataset, set_environment
+from utilities.bigquery import BigQuery
 from config import RAW_BQ_DATASET
 
 #####
@@ -14,7 +14,7 @@ from config import RAW_BQ_DATASET
 
 @flow(log_prints=False)
 def kickoff(full_refresh: bool, dataset: str, testing: bool):
-    bq = GoogleBigQuery(app_creds=os.environ["GCP_CREDS"])
+    bq = BigQuery(service_credentials=os.environ["GCP_CREDS"])
     successful_run = run_api(bq=bq, full_refresh=full_refresh, dataset=dataset)
 
     if successful_run and not testing:
@@ -22,7 +22,7 @@ def kickoff(full_refresh: bool, dataset: str, testing: bool):
 
 
 @task
-def run_api(bq: GoogleBigQuery, full_refresh: bool, dataset: str = RAW_BQ_DATASET):
+def run_api(bq: BigQuery, full_refresh: bool, dataset: str = RAW_BQ_DATASET):
     return get_all_boxscore_data(bq=bq, full_refresh=full_refresh, dataset=dataset)
 
 
@@ -66,7 +66,7 @@ if __name__ == "__main__":
     ###
 
     if LOCAL:
-        bq = GoogleBigQuery(app_creds=os.environ["GCP_CREDS"])
+        bq = BigQuery(service_credentials=os.environ["GCP_CREDS"])
         run_api.fn(bq=bq, full_refresh=FULL_REFRESH, dataset=DATASET)
         run_dbt.fn()
 

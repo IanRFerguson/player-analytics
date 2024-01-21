@@ -51,6 +51,17 @@ class BigQuery:
 
         return self.__client
 
+    def query(self, sql: str, return_result: bool = True):
+        """
+        Very basic API to run BigQuery SQL
+        """
+
+        query_job = self.client.query(query=sql)
+        result = query_job.result()
+
+        if return_result:
+            return result.to_dataframe()
+
     def get_table_id(self, table_name: str):
         """
         Retrieves table ID for a given BigQuery table

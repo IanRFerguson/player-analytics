@@ -1,9 +1,7 @@
-import os
 import json
 import datetime
 import pandas as pd
-from parsons import Table
-from parsons.google.google_bigquery import GoogleBigQuery
+from utilities.bigquery import BigQuery
 from nba_api.stats.endpoints.teamgamelog import TeamGameLog
 from config import RAW_BQ_DATASET, STAT_TABLE_CONFIG, NYK_ID, LOG_TABLE
 from utilities.logger import logger
@@ -29,7 +27,7 @@ def get_game_metadata(team_id: str = NYK_ID):
 
 
 def get_all_boxscore_data(
-    bq: GoogleBigQuery,
+    bq: BigQuery,
     full_refresh: bool = False,
     dataset: str = RAW_BQ_DATASET,
 ):
@@ -51,7 +49,7 @@ def get_all_boxscore_data(
 
     if full_refresh and bq.table_exists(table_name=log_table):
         # Truncate the log table to start fresh
-        bq.delete_table(table_name=log_table)
+        bq.drop_table(table_name=log_table)
         drop_destination_tables(
             bq=bq,
             dataset=dataset,
@@ -98,29 +96,21 @@ def build_tables(
     data: pd.DataFrame,
     raw_table_name: str,
     raw_dataset: str,
-    bq: GoogleBigQuery,
+    bq: BigQuery,
     if_exists: str = "append",
 ):
     # Full dataset.table name
     table_name = f"{raw_dataset}.{raw_table_name}"
     logger.debug(f"Processing {raw_dataset}.{raw_table_name}...")
 
-    # Convert DataFrame to Parsons table
-    # TODO: Should be easy to clean this up
-    tbl = Table().from_dataframe(dataframe=data)
-
-    # Copy data to BigQuery
-    bq.copy(
-        tbl=tbl,
-        table_name=table_name,
-        if_exists=if_exists,
-        tmp_gcs_bucket=os.environ["DEV_BUCKET"],
+    bq.copy_dataframe_to_bigquery(
+        dataframe=data, table_name=table_name, if_exists=if_exists
     )
 
 
 def process(
     id_: str,
-    bq: GoogleBigQuery,
+    bq: BigQuery,
     error_manifest: list,
     log_table: str,
     dataset: str = RAW_BQ_DATASET,
@@ -138,6 +128,7 @@ def process(
         endpoint = STAT_TABLE_CONFIG[build_type]["api_endpoint"]
         raw_table_name = STAT_TABLE_CONFIG[build_type]["raw_table_name"]
         team_id_field = STAT_TABLE_CONFIG[build_type]["team_id_field"]
+        ignore_columns = STAT_TABLE_CONFIG[build_type]["ignore_columns"]
 
         try:
             # Use API to build dataframe
@@ -145,6 +136,11 @@ def process(
             data = data[data[team_id_field].astype(str) == NYK_ID].reset_index(
                 drop=True
             )
+
+            if ignore_columns:
+                logger.debug(f"Dropping the following columns: {ignore_columns}")
+                data = data.drop(ignore_columns, axis=1)
+
             logger.debug("Successfully built dataframes")
 
         except Exception as e:
@@ -171,23 +167,18 @@ def process(
     write_to_log_table(log_table=log_table, game_id=id_, bq=bq)
 
 
-def write_to_log_table(log_table: str, game_id: str, bq: GoogleBigQuery):
+def write_to_log_table(log_table: str, game_id: str, bq: BigQuery):
     """
     Writes ELT metadata to log table
     """
 
-    meta_ = Table([{"id": game_id, "_load_timestamp": datetime.datetime.now()}])
-    bq.copy(
-        tbl=meta_,
-        table_name=log_table,
-        if_exists="append",
-        tmp_gcs_bucket=os.environ["DEV_BUCKET"],
+    meta_ = pd.DataFrame([{"id": game_id, "_load_timestamp": datetime.datetime.now()}])
+    bq.copy_dataframe_to_bigquery(
+        dataframe=meta_, table_name=log_table, if_exists="append"
     )
 
 
-def get_ids_from_log_table(
-    log_table: str, game_log_table: str, bq: GoogleBigQuery
-) -> list:
+def get_ids_from_log_table(log_table: str, game_log_table: str, bq: BigQuery) -> list:
     """
     Queries all LOGGED and INCOMPLETE games. We don't want to attempt
     to write API results for ongoing games as the data types get
@@ -214,7 +205,7 @@ def get_ids_from_log_table(
     return incomplete_games
 
 
-def drop_destination_tables(destination_tables: list, bq: GoogleBigQuery, dataset: str):
+def drop_destination_tables(destination_tables: list, bq: BigQuery, dataset: str):
     """
     Iteratively drops destination tables when FULL_REFRESH
     is set to True
@@ -222,4 +213,4 @@ def drop_destination_tables(destination_tables: list, bq: GoogleBigQuery, datase
 
     for table_ in destination_tables:
         logger.debug(f"Dropping {table_}...")
-        bq.delete_table(table_name=f"{dataset}.{table_}")
+        bq.drop_table(table_name=f"{dataset}.{table_}")
