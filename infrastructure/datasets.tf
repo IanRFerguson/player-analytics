@@ -8,18 +8,6 @@ resource "google_bigquery_dataset" "prod_dataset" {
     description = "Output dataset for production ELT runs"
     location = "US"
     default_table_expiration_ms = null
-
-    # TODO: Make this modular + play with groups
-    access {
-        role = "OWNER"
-        user_by_email = "IANFERGUSONRVA@gmail.com"
-    }
-
-    access {
-        role = "READER"
-        domain = "hashicorp.com"
-    }
-  
 }
 
 # Testing dataset
@@ -29,15 +17,4 @@ resource "google_bigquery_dataset" "dev_dataset" {
     description = "Output dataset for development ELT runs"
     location = "US"
     default_table_expiration_ms = null
-
-    access {
-        role = "OWNER"
-        user_by_email = "IANFERGUSONRVA@gmail.com"
-    }
-
-    access {
-        role = "READER"
-        domain = "hashicorp.com"
-    }
-  
 }
