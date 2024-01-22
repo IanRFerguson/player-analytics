@@ -22,19 +22,6 @@ This analytics pipeline is composed of the following steps:
 
 ## Usage
 
-Run this pipeline locally via Docker:
-
-```
-docker compose up --build -d
-```
-
-Once the container builds, you can run an interactive shell and execute the source code as you would at the command line on your own machine:
-
-```
-# Start interactive shell via Docker compose
-bash dev__interactive_shell.sh
-```
-
 Set up the requisite GCP infrastructure with terraform:
 
 ```
@@ -48,6 +35,19 @@ terraform plan -out out
 terraform apply out
 
 cd ..
+```
+
+Run this pipeline locally via Docker:
+
+```
+docker compose up --build -d
+```
+
+Once the container builds, you can run an interactive shell and execute the source code as you would at the command line on your own machine:
+
+```
+# Start interactive shell via Docker compose
+bash dev__interactive_shell.sh
 ```
 
 ```
