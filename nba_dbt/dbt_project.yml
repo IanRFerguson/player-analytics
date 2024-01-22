@@ -19,8 +19,10 @@ models:
   nba_analytics:
     base:
       +materialized: view
+      +schema: __base
     staging:
       +materialized: table
+      +schema: __staging
     summary:
       +materialized: table
       +schema: __clean
