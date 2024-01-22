@@ -197,7 +197,7 @@ def get_ids_from_log_table(log_table: str, game_log_table: str, bq: BigQuery) ->
 
     if bq.table_exists(table_name=log_table):
         query = f"SELECT DISTINCT id FROM {log_table}"
-        result = bq.query(query, return_values=True)
+        result = bq.query(query, return_result=True)
 
         return set([x for x in result["id"]] + incomplete_games)
 
