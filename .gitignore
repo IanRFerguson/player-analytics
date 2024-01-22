@@ -2,11 +2,14 @@
 creds/
 venv/
 logs/
+.terraform/
 
 ### File types
 *.pyc*
 *ipynb*
 *prefect__test_wf*
-*.env*
+*.env
 service_accounts/*.json
 *DS_Store*
+*tfstate*
+out

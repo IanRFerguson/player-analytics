@@ -1,9 +1,7 @@
-import os
 import json
 import datetime
 import pandas as pd
-from parsons import Table
-from parsons.google.google_bigquery import GoogleBigQuery
+from utilities.bigquery import BigQuery
 from nba_api.stats.endpoints.teamgamelog import TeamGameLog
 from config import RAW_BQ_DATASET, STAT_TABLE_CONFIG, NYK_ID, LOG_TABLE
 from utilities.logger import logger
@@ -29,7 +27,7 @@ def get_game_metadata(team_id: str = NYK_ID):
 
 
 def get_all_boxscore_data(
-    bq: GoogleBigQuery,
+    bq: BigQuery,
     full_refresh: bool = False,
     dataset: str = RAW_BQ_DATASET,
 ):
@@ -51,12 +49,21 @@ def get_all_boxscore_data(
 
     if full_refresh and bq.table_exists(table_name=log_table):
         # Truncate the log table to start fresh
-        bq.delete_table(table_name=log_table)
+        bq.drop_table(table_name=log_table)
+        drop_destination_tables(
+            bq=bq,
+            dataset=dataset,
+            destination_tables=[
+                STAT_TABLE_CONFIG[x]["raw_table_name"] for x in STAT_TABLE_CONFIG.keys()
+            ],
+        )
 
     ###
 
     all_errors = []
-    existing_game_ids = get_ids_from_log_table(log_table=log_table, bq=bq)
+    existing_game_ids = get_ids_from_log_table(
+        log_table=log_table, game_log_table=f"{dataset}.game_log", bq=bq
+    )
     game_ids = [x for x in all_game_metadata["Game_ID"] if x not in existing_game_ids]
 
     if len(game_ids) == 0:
@@ -66,12 +73,10 @@ def get_all_boxscore_data(
     logger.debug(f"Identified {len(game_ids)} Game IDs to process...")
     logger.info(f"Processing {len(game_ids)} games...")
 
-    for ix, id_ in enumerate(game_ids):
+    for id_ in game_ids:
         process(
-            index=ix,
             id_=id_,
             bq=bq,
-            full_refresh=full_refresh,
             error_manifest=all_errors,
             dataset=dataset,
             log_table=log_table,
@@ -91,31 +96,21 @@ def build_tables(
     data: pd.DataFrame,
     raw_table_name: str,
     raw_dataset: str,
-    bq: GoogleBigQuery,
+    bq: BigQuery,
     if_exists: str = "append",
 ):
     # Full dataset.table name
     table_name = f"{raw_dataset}.{raw_table_name}"
     logger.debug(f"Processing {raw_dataset}.{raw_table_name}...")
 
-    # Convert DataFrame to Parsons table
-    # TODO: Should be easy to clean this up
-    tbl = Table().from_dataframe(dataframe=data)
-
-    # Copy data to BigQuery
-    bq.copy(
-        tbl=tbl,
-        table_name=table_name,
-        if_exists=if_exists,
-        tmp_gcs_bucket=os.environ["DEV_BUCKET"],
+    bq.copy_dataframe_to_bigquery(
+        dataframe=data, table_name=table_name, if_exists=if_exists
     )
 
 
 def process(
-    index: int,
     id_: str,
-    bq: GoogleBigQuery,
-    full_refresh: bool,
+    bq: BigQuery,
     error_manifest: list,
     log_table: str,
     dataset: str = RAW_BQ_DATASET,
@@ -133,18 +128,7 @@ def process(
         endpoint = STAT_TABLE_CONFIG[build_type]["api_endpoint"]
         raw_table_name = STAT_TABLE_CONFIG[build_type]["raw_table_name"]
         team_id_field = STAT_TABLE_CONFIG[build_type]["team_id_field"]
-
-        # Drop the table if desired (but only in the first loop)
-        if (
-            full_refresh
-            and index == 0
-            and bq.table_exists(f"{dataset}.{raw_table_name}")
-        ):
-            logger.debug(f"Attempting to drop table {raw_table_name}...")
-            bq.delete_table(table_name=f"{dataset}.{raw_table_name}")
-            logger.info(f"Successfully dropped table {dataset}.{raw_table_name}")
-
-        ###
+        ignore_columns = STAT_TABLE_CONFIG[build_type]["ignore_columns"]
 
         try:
             # Use API to build dataframe
@@ -152,6 +136,11 @@ def process(
             data = data[data[team_id_field].astype(str) == NYK_ID].reset_index(
                 drop=True
             )
+
+            if ignore_columns:
+                logger.debug(f"Dropping the following columns: {ignore_columns}")
+                data = data.drop(ignore_columns, axis=1)
+
             logger.debug("Successfully built dataframes")
 
         except Exception as e:
@@ -178,32 +167,50 @@ def process(
     write_to_log_table(log_table=log_table, game_id=id_, bq=bq)
 
 
-def write_to_log_table(log_table: str, game_id: str, bq: GoogleBigQuery):
+def write_to_log_table(log_table: str, game_id: str, bq: BigQuery):
     """
     Writes ELT metadata to log table
     """
 
-    meta_ = Table([{"id": game_id, "_load_timestamp": datetime.datetime.now()}])
-    bq.copy(
-        tbl=meta_,
-        table_name=log_table,
-        if_exists="append",
-        tmp_gcs_bucket=os.environ["DEV_BUCKET"],
+    meta_ = pd.DataFrame([{"id": game_id, "_load_timestamp": datetime.datetime.now()}])
+    bq.copy_dataframe_to_bigquery(
+        dataframe=meta_, table_name=log_table, if_exists="append"
     )
 
 
-def get_ids_from_log_table(log_table: str, bq: GoogleBigQuery) -> list:
+def get_ids_from_log_table(log_table: str, game_log_table: str, bq: BigQuery) -> list:
     """
-    Queries log table and returns list of logged game ids
+    Queries all LOGGED and INCOMPLETE games. We don't want to attempt
+    to write API results for ongoing games as the data types get
+    misconfigured
     """
 
     logger.debug(f"Checking ids against {log_table}...")
 
+    # We assume that this table exists ... the API nullifies
+    # many fields if a game is actively in progress, which is
+    # maybe helpful but not for our purposes
+    incomplete_games_query = (
+        f"SELECT DISTINCT GAME_ID AS id_ FROM {game_log_table} WHERE WL IS NULL"
+    )
+    incomplete_games = [x for x in bq.query(incomplete_games_query)["id_"]]
+
     if bq.table_exists(table_name=log_table):
         query = f"SELECT DISTINCT id FROM {log_table}"
-        result = bq.query(query, return_values=True)
+        result = bq.query(query, return_result=True)
 
-        return [x for x in result["id"]]
+        return set([x for x in result["id"]] + incomplete_games)
 
-    logger.debug(f"{log_table} doesn't exist, returning empty array...")
-    return []
+    logger.debug(f"{log_table} doesn't exist, returning incomplete games only...")
+    return incomplete_games
+
+
+def drop_destination_tables(destination_tables: list, bq: BigQuery, dataset: str):
+    """
+    Iteratively drops destination tables when FULL_REFRESH
+    is set to True
+    """
+
+    for table_ in destination_tables:
+        logger.debug(f"Dropping {table_}...")
+        bq.drop_table(table_name=f"{dataset}.{table_}")
