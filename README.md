@@ -33,7 +33,24 @@ Once the container builds, you can run an interactive shell and execute the sour
 ```
 # Start interactive shell via Docker compose
 bash dev__interactive_shell.sh
+```
 
+Set up the requisite GCP infrastructure with terraform:
+
+```
+# Connect Terraform to your GCP instance
+cd infrastructure && terraform init
+
+# Assess modules to build
+terraform plan -out out
+
+# Build infrastructure
+terraform apply out
+
+cd ..
+```
+
+```
 # Run the main function "locally"
 python src/run.py --full-refresh --local
 
@@ -46,4 +63,4 @@ python src/run.py
 - [x] Clean dbt models (base + staging) are well defined and run without test failures
 - [ ] Summary dbt models accurately join tables together to offer insights about players and games
 - [ ] Prefect workflow set up to run on a daily cadence
-- [ ] Core infrastructure is managed via Terraform
+- [x] Core infrastructure is managed via Terraform
