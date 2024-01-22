@@ -11,7 +11,6 @@ WITH
             {{ easy_alias('NICKNAME', 'player__nickname') }},
             {{ easy_alias('START_POSITION', 'player__start_position') }},
             {{ easy_alias('COMMENT', 'player__comments') }},
-            {{ easy_alias('MIN', 'minutes') }},
             {{ easy_alias('PCT_FGA_2PT', 'distribution__from_two') }},
             {{ easy_alias('PCT_FGA_3PT', 'distribution__from_three') }},
             {{ easy_alias('PCT_PTS_2PT', 'points__from_two') }},

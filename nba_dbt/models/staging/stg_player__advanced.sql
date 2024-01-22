@@ -1,4 +1,17 @@
 WITH
+    refactored AS (
+
+        SELECT
+
+            *,
+            CASE
+                WHEN player__comment LIKE '%DNP%' or player__comment LIKE '%DND%' THEN '0:0'
+                ELSE minutes
+            END AS game_minutes
+
+        FROM {{ ref("base_player__advanced") }}
+    ),
+
     base AS (
         SELECT
 
@@ -9,7 +22,8 @@ WITH
             player__last_name,
             player__start_position,
             minutes,
-            {{ convert_player_minutes_to_seconds("minutes") }} AS minutes__cleaned,
+            game_minutes,
+            {{ convert_player_minutes_to_seconds("game_minutes") }} AS minutes__cleaned,
             rating__net,
             rating__offensive,
             rating__defensive,
@@ -31,7 +45,7 @@ WITH
             pace__per_40,
             {{ dbt_utils.generate_surrogate_key(["game_id", "player__id"]) }} AS advanced_unique_id
 
-        FROM {{ ref("base_player__advanced") }}
+        FROM refactored
     )
 
 SELECT * FROM base
