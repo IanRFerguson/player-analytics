@@ -1,0 +1,9 @@
+version: 2
+
+models:
+  - name: cln_player__back_to_back
+    columns:
+      - name:
+        tests:
+          - unique
+          - not_null

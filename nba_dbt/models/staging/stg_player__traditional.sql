@@ -1,4 +1,13 @@
 WITH
+    meta AS (
+        SELECT
+
+            *,
+            'TRADITIONAL' AS _model
+
+        FROM {{ ref("base_player__traditional") }}
+    ),
+
     base AS (
         SELECT
 
@@ -26,9 +35,9 @@ WITH
             personal_fouls,
             points,
             plus_minus,
-            {{ dbt_utils.generate_surrogate_key(["game_id", "player__id"]) }} AS traditional_unique_id
+            {{ dbt_utils.generate_surrogate_key(["game_id", "player__id", "_model"]) }} AS traditional_unique_id
 
-        FROM {{ ref("base_player__traditional") }}
+        FROM meta
     )
 
 SELECT * FROM base

@@ -1,5 +1,5 @@
 WITH
-    refactored AS (
+    meta AS (
 
         SELECT
 
@@ -7,7 +7,8 @@ WITH
             CASE
                 WHEN player__comment LIKE '%DNP%' or player__comment LIKE '%DND%' THEN '0:0'
                 ELSE minutes
-            END AS game_minutes
+            END AS game_minutes,
+            'ADVANCED' AS _model
 
         FROM {{ ref("base_player__advanced") }}
     ),
@@ -43,9 +44,9 @@ WITH
             pace,
             pace__estimated,
             pace__per_40,
-            {{ dbt_utils.generate_surrogate_key(["game_id", "player__id"]) }} AS advanced_unique_id
+            {{ dbt_utils.generate_surrogate_key(["game_id", "player__id", "_model"]) }} AS advanced_unique_id
 
-        FROM refactored
+        FROM meta
     )
 
 SELECT * FROM base
