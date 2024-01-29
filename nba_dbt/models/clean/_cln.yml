@@ -3,7 +3,7 @@ version: 2
 models:
   - name: cln_player__back_to_back
     columns:
-      - name:
+      - name: is_back_to_back
         tests:
           - unique
           - not_null
