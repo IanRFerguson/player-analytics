@@ -4,7 +4,7 @@ WITH
 
             *,
             PARSE_DATE('%b %d, %Y', game_date) AS game_date__parsed,
-            LAG(PARSE_DATE('%b %d, %Y', game_date)) OVER (ORDER BY game_date ASC) AS last_game_date,
+            LAG(PARSE_DATE('%b %d, %Y', game_date)) OVER (ORDER BY PARSE_DATE('%b %d, %Y', game_date) ASC) AS last_game_date,
             CASE
                 WHEN LOWER(matchup) LIKE '%vs%' THEN 'HOME'
                 WHEN LOWER(matchup) LIKE '%@%' THEN 'AWAY'
@@ -45,6 +45,11 @@ WITH
             game_location,
             opponent,
             outcome__win_loss,
+            CASE
+                WHEN outcome__win_loss = 'W' THEN 1
+                WHEN outcome__win_loss = 'L' THEN 0
+                ELSE null
+            END AS outcome__bin,
             outcome__net_wins,
             outcome__net_losses,
             outcome__win_percentage,
