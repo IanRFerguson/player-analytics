@@ -8,10 +8,10 @@ WITH
             points,
             field_goals__percentage,
             three_point__percentage,
-            free_throw__percentage,
-            field_goal__attemps,
-            three_point__attemps,
-            free_throw__attempts,
+            free_throws__percentage,
+            field_goals__attempts,
+            three_point__attempts,
+            free_throws__attempted,
             rebounds__offensive,
             rebounds__defensive,
             rebounds__total,
@@ -122,9 +122,9 @@ WITH
             traditional.rebounds__total AS total_rebounds,
 
             -- Shooting raw
-            traditional.field_goal__attemps AS field_goal_attempts,
-            traditional.three_point__attemps AS three_point_attempts,
-            traditional.free_throw__attempts AS free_throw_attempts,
+            traditional.field_goals__attempts AS field_goal_attempts,
+            traditional.three_point__attempts AS three_point_attempts,
+            traditional.free_throws__attempted AS free_throw_attempts,
 
             -- On-court percentages
             advanced.rating__net AS net_rating,
@@ -140,7 +140,7 @@ WITH
             -- Shooting percentages
             traditional.field_goals__percentage AS field_goal_percentage,
             traditional.three_point__percentage AS three_point_percentage,
-            traditional.free_throw__percentage AS free_throw_percentage,
+            traditional.free_throws__percentage AS free_throw_percentage,
             player_track.contested_field_goals__percentage AS contested_field_goal_percentage,
             player_track.unconstested_field_goals__percentage AS uncontested_field_goal_percentage,
             player_track.defended_field_goals__percentage AS defended_field_goal_percentage, 

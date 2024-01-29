@@ -3,7 +3,7 @@ WITH
         SELECT
 
             *,
-            PARSE_DATE('%b %d, %Y', game_date) AS game_date,
+            PARSE_DATE('%b %d, %Y', game_date) AS game_date__parsed,
             LAG(PARSE_DATE('%b %d, %Y', game_date)) OVER (ORDER BY game_date ASC) AS last_game_date,
             CASE
                 WHEN LOWER(matchup) LIKE '%vs%' THEN 'HOME'
@@ -20,11 +20,11 @@ WITH
         SELECT
 
             *,
-            DATE_DIFF(game_date, most_recent, DAY) AS days_between_games,
+            DATE_DIFF(game_date__parsed, last_game_date, DAY) AS days_between_games,
             CASE
-                WHEN DATE_DIFF(game_date, most_recent, DAY) IS NULL
+                WHEN DATE_DIFF(game_date__parsed, last_game_date, DAY) IS NULL
                     THEN 0
-                WHEN DATE_DIFF(game_date, most_recent, DAY) = 1
+                WHEN DATE_DIFF(game_date__parsed, last_game_date, DAY) = 1
                     THEN 1
                 ELSE 0
             END AS is_back_to_back
@@ -38,7 +38,7 @@ WITH
 
             team_id,
             game_id,
-            game_date,
+            game_date__parsed AS game_date,
             days_between_games,
             is_back_to_back,
             matchup,
