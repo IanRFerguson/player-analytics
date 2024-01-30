@@ -20,6 +20,8 @@ This analytics pipeline is composed of the following steps:
     * Team shooting percentages
     * Team defensive rating vs. opponents
 
+<img src=".local/DAG.png" width=50%>
+
 ## Usage
 
 Set up the requisite GCP infrastructure with terraform:
