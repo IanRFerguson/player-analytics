@@ -1,7 +1,7 @@
 services:
   player_analytics:
     build:
-      dockerfile: ./Dockerfile
+      dockerfile: ./deploy/Dockerfile.dev
     entrypoint: [ "sleep", "infinity" ]
     volumes:
       - .:/app/

@@ -12,7 +12,7 @@ from config import RAW_BQ_DATASET
 #####
 
 
-@flow(log_prints=False)
+@flow(name="nba-player-analytics", log_prints=False)
 def kickoff(full_refresh: bool, dataset: str, testing: bool):
     bq = BigQuery(service_credentials=os.environ["GCP_CREDS"])
     successful_run = run_api(bq=bq, full_refresh=full_refresh, dataset=dataset)
