@@ -88,9 +88,9 @@ WITH
         FROM players
         JOIN games ON players.game_id = games.game_id
         GROUP BY
+            opponent,
             player_id,
-            player_name,
-            opponent
+            player_name
         ORDER BY
             opponent,
             player_name

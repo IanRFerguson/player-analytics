@@ -3,7 +3,8 @@ WITH
         SELECT
 
             game_id,
-            is_back_to_back
+            game_location,
+            outcome__bin
 
         FROM {{ ref("stg_team__game_log") }}
     ),
@@ -51,8 +52,10 @@ WITH
 
             player_id,
             player_name,
-            is_back_to_back,
+            game_location,
             ROUND(SUM(player_started) / COUNT(players.game_id), 2) AS games_started_percentage,
+            COUNT(players.game_id) AS games_played,
+            SUM(outcome__bin) / COUNT(players.game_id) AS win_percentage,
             ROUND(AVG(points), 2) AS avg_points,
             ROUND(AVG(assists), 2) AS avg_assists,
             ROUND(AVG(steals), 2) AS avg_steals,
@@ -80,16 +83,16 @@ WITH
             ROUND(AVG(three_point_percentage), 2) AS avg_three_point_percentage,
             ROUND(AVG(free_throw_percentage), 2) AS avg_free_throw_percentage,
             ROUND(AVG(effective_field_goal_percentage), 2) AS avg_effective_field_goal_percentage,            
-            {{ dbt_utils.generate_surrogate_key(["is_back_to_back", "player_id"]) }} AS player_back_to_back_id
+            {{ dbt_utils.generate_surrogate_key(["game_location", "player_id"]) }} AS player_home_away_id
 
         FROM players
         JOIN games ON players.game_id = games.game_id
         GROUP BY
-            is_back_to_back,
+            game_location,
             player_id,
             player_name
         ORDER BY
-            is_back_to_back,
+            game_location,
             player_name
     )
 
