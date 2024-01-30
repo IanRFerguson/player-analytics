@@ -7,6 +7,13 @@ models:
         tests:
           - unique
           - not_null
+
+  - name: stg_player__aggregate
+    columns:
+      - name: player_aggregate_id
+        tests:
+          - unique
+          - not_null
   
   - name: stg_player__player_track
     columns:

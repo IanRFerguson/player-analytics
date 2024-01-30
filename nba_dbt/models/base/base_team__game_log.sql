@@ -12,7 +12,7 @@ WITH
             {{ easy_alias('W_PCT', 'outcome__win_percentage' ) }},
             {{ easy_alias('MIN', 'minutes' ) }},
             {{ easy_alias('FGM', 'field_goals__made' ) }},
-            {{ easy_alias('FGA', 'field_goals__attemps' ) }},
+            {{ easy_alias('FGA', 'field_goals__attempts' ) }},
             {{ easy_alias('FG_PCT', 'field_goals__percentage' ) }},
             {{ easy_alias('FG3M', 'three_pointers__made' ) }},
             {{ easy_alias('FG3A', 'three_pointers__attempts' ) }},

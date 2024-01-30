@@ -25,6 +25,7 @@ def set_service_account_absolute_path():
     # TODO - Would love to make this more dynamic
     root_ = "../.."
     path_ = os.path.abspath(os.path.join(root_, os.environ["GCP_CREDS"]))
+    path_ = f"/app{path_}"
 
     if not os.path.exists(path_):
         raise OSError(f"Can't update GCP creds after attempt - {path_}")

@@ -1,0 +1,33 @@
+version: 2
+
+models:
+  - name: cln_player__averages
+    columns:
+      - name: player_id
+        tests:
+          - unique
+          - not_null
+
+  - name: cln_player__back_to_back
+    columns:
+      - name: player_back_to_back_id
+        tests:
+          - unique
+          - not_null
+
+  - name: cln_player__by_opponent
+    columns:
+      - name: player_opponent_id
+        tests:
+          - unique
+          - not_null
+
+  - name: cln_player__home_away
+    columns:
+      - name: player_home_away_id
+        tests:
+          - unique
+          - not_null
+
+
+  
