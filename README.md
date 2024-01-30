@@ -61,6 +61,6 @@ python src/run.py
 ## Running Checklist
 - [x] Python API is successfully writing to BigQuery project 
 - [x] Clean dbt models (base + staging) are well defined and run without test failures
-- [ ] Summary dbt models accurately join tables together to offer insights about players and games
+- [x] Summary dbt models accurately join tables together to offer insights about players and games
 - [ ] Prefect workflow set up to run on a daily cadence
 - [x] Core infrastructure is managed via Terraform
