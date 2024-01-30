@@ -54,7 +54,7 @@ WITH
             outcome__net_losses,
             outcome__win_percentage,
             field_goals__made,
-            field_goals__attemps,
+            field_goals__attempts,
             field_goals__percentage,
             three_pointers__made,
             three_pointers__attempts,
