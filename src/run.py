@@ -79,5 +79,5 @@ if __name__ == "__main__":
                 "dataset": DATASET,
                 "testing": TESTING,
             },
-            interval=6000,
+            cron="0 11 * * *"
         )
