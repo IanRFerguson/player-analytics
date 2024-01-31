@@ -3,6 +3,8 @@ creds/
 venv/
 logs/
 .terraform/
+*terraform.tfstate.backup
+
 
 ### File types
 *.pyc*
@@ -11,5 +13,4 @@ logs/
 *.env
 service_accounts/*.json
 *DS_Store*
-*tfstate*
 out
