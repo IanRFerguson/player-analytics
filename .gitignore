@@ -14,3 +14,4 @@ logs/
 service_accounts/*.json
 *DS_Store*
 out
+*lock.info*
