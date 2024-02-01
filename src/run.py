@@ -1,6 +1,6 @@
 import os
 import logging
-from prefect import flow, task
+from prefect import flow, task, get_run_logger
 from api_helpers import get_all_boxscore_data
 from dbt_helpers import build_dbt
 from utilities.cli import cli
@@ -12,7 +12,7 @@ from config import RAW_BQ_DATASET
 #####
 
 
-@flow(name="nba-player-analytics", log_prints=False)
+@flow(name="nba-player-analytics", log_prints=True)
 def kickoff(full_refresh: bool, dataset: str, testing: bool):
     bq = BigQuery(service_credentials=os.environ["GCP_CREDS"])
     successful_run = run_api(bq=bq, full_refresh=full_refresh, dataset=dataset)
@@ -47,12 +47,6 @@ if __name__ == "__main__":
     if DEBUG:
         logger.setLevel(level=10)
         logger.debug("Running logger in debug...")
-    else:
-        # If we're running the logger normally we don't really need all
-        # the logs we get from Parsons
-        logging.getLogger("parsons.google.google_cloud_storage").setLevel(level=30)
-
-    ###
 
     logger.info("Running with the following config...")
     config = {
