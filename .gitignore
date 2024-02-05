@@ -4,6 +4,8 @@ venv/
 logs/
 .terraform/
 *terraform.tfstate.backup
+*ian_run_local*
+local_config.json
 
 
 ### File types
