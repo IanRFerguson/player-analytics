@@ -7,23 +7,39 @@ from utilities.cli import cli
 from utilities.logger import logger
 from utilities.environment import set_dataset, set_environment
 from utilities.bigquery import BigQuery
-from config import RAW_BQ_DATASET
+from pull_config_into_environment import main as setup_config
 
 #####
 
 
 @flow(name="nba-player-analytics", log_prints=True)
-def kickoff(full_refresh: bool, dataset: str, testing: bool):
+def kickoff(
+    full_refresh: bool, dataset: str, testing: bool, team_abbrevation: str, team_id: str
+):
     bq = BigQuery(service_credentials=os.environ["GCP_CREDS"])
-    successful_run = run_api(bq=bq, full_refresh=full_refresh, dataset=dataset)
+    successful_run = run_api(
+        bq=bq,
+        full_refresh=full_refresh,
+        dataset=dataset,
+        team_abbrevation=team_abbrevation,
+        team_id=team_id,
+    )
 
     if successful_run and not testing:
         run_dbt()
 
 
 @task
-def run_api(bq: BigQuery, full_refresh: bool, dataset: str = RAW_BQ_DATASET):
-    return get_all_boxscore_data(bq=bq, full_refresh=full_refresh, dataset=dataset)
+def run_api(
+    bq: BigQuery, full_refresh: bool, dataset: str, team_abbrevation: str, team_id: str
+):
+    return get_all_boxscore_data(
+        bq=bq,
+        full_refresh=full_refresh,
+        dataset=dataset,
+        team_abbrevation=team_abbrevation,
+        team_id=team_id,
+    )
 
 
 @task
@@ -42,7 +58,7 @@ if __name__ == "__main__":
     FULL_REFRESH = args_.full_refresh
     TESTING = args_.test
     DEBUG = args_.debug
-    DATASET = set_dataset(TESTING, default_dataset=RAW_BQ_DATASET)
+    DATASET = set_dataset(TESTING)
 
     if DEBUG:
         logger.setLevel(level=10)
@@ -55,7 +71,6 @@ if __name__ == "__main__":
         "Testing": TESTING,
         "Destination Dataset": DATASET,
     }
-    logger.info(config)
 
     ###
 
@@ -65,6 +80,7 @@ if __name__ == "__main__":
         run_dbt.fn()
 
     else:
+        setup_config(variables=["TEAM_ABBREVIATION"])
         kickoff.serve(
             name="nyk-player-data",
             tags=["analytics"],
@@ -72,6 +88,7 @@ if __name__ == "__main__":
                 "full_refresh": FULL_REFRESH,
                 "dataset": DATASET,
                 "testing": TESTING,
+                "team_abbreviation": "nyk",
             },
-            cron="0 11 * * *"
+            cron="0 11 * * *",
         )
