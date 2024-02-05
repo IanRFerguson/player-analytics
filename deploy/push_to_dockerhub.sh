@@ -1,6 +1,7 @@
 #!/bin/bash
 
-STAGE=$1
+DOCKER_IMAGE_NAME=$1
+STAGE=$2
 
 if [ $STAGE == "--prod" ]; then
     echo "Using production image..."
@@ -15,9 +16,6 @@ if [ ! -f $DOCKERFILE ]; then
     echo "Dockerfile location is misconfigured..."
     exit 1
 fi
-
-# Static container name
-DOCKER_IMAGE_NAME=ianrichardferguson/nba-player-analytics
 
 # Build container
 docker build .  \
