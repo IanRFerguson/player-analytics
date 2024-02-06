@@ -1,27 +1,24 @@
 import os
-import logging
-from prefect import flow, task, get_run_logger
+from prefect import flow, task
 from api_helpers import get_all_boxscore_data
 from dbt_helpers import build_dbt
 from utilities.cli import cli
 from utilities.logger import logger
 from utilities.environment import set_dataset, set_environment
 from utilities.bigquery import BigQuery
-from pull_config_into_environment import main as setup_config
 
-#####
+##########
 
 
-@flow(name="nba-player-analytics", log_prints=True)
+@flow(name="nba-player-analytics")
 def kickoff(
-    full_refresh: bool, dataset: str, testing: bool, team_abbrevation: str, team_id: str
+    full_refresh: bool, dataset: str, testing: bool, team_id: str
 ):
     bq = BigQuery(service_credentials=os.environ["GCP_CREDS"])
     successful_run = run_api(
         bq=bq,
         full_refresh=full_refresh,
         dataset=dataset,
-        team_abbrevation=team_abbrevation,
         team_id=team_id,
     )
 
@@ -31,13 +28,12 @@ def kickoff(
 
 @task
 def run_api(
-    bq: BigQuery, full_refresh: bool, dataset: str, team_abbrevation: str, team_id: str
+    bq: BigQuery, full_refresh: bool, dataset: str, team_id: str
 ):
     return get_all_boxscore_data(
         bq=bq,
         full_refresh=full_refresh,
         dataset=dataset,
-        team_abbrevation=team_abbrevation,
         team_id=team_id,
     )
 
@@ -58,29 +54,26 @@ if __name__ == "__main__":
     FULL_REFRESH = args_.full_refresh
     TESTING = args_.test
     DEBUG = args_.debug
-    DATASET = set_dataset(TESTING)
+    DATASET = set_dataset(TESTING, default_dataset="raw__nyk_data")
 
     if DEBUG:
         logger.setLevel(level=10)
         logger.debug("Running logger in debug...")
 
-    logger.info("Running with the following config...")
-    config = {
-        "Local Run": LOCAL,
-        "Full Refresh": FULL_REFRESH,
-        "Testing": TESTING,
-        "Destination Dataset": DATASET,
-    }
-
     ###
 
     if LOCAL:
+        logger.debug(os.environ["GCP_CREDS"])
         bq = BigQuery(service_credentials=os.environ["GCP_CREDS"])
-        run_api.fn(bq=bq, full_refresh=FULL_REFRESH, dataset=DATASET)
+        run_api.fn(
+            bq=bq,
+            full_refresh=FULL_REFRESH,
+            dataset=DATASET,
+            team_id="1610612752",
+        )
         run_dbt.fn()
 
     else:
-        setup_config(variables=["TEAM_ABBREVIATION"])
         kickoff.serve(
             name="nyk-player-data",
             tags=["analytics"],
@@ -88,7 +81,8 @@ if __name__ == "__main__":
                 "full_refresh": FULL_REFRESH,
                 "dataset": DATASET,
                 "testing": TESTING,
-                "team_abbreviation": "nyk",
+                "team_id": "1610612752",
             },
-            cron="0 11 * * *",
+            # cron="0 16 * * *",
+            interval=80,
         )
