@@ -7,5 +7,6 @@ WORKDIR /app
 EXPOSE 8080
 
 RUN pip install -r requirements.txt
+RUN chmod +x deploy/entrypoint.sh
 
 CMD [ "bash", "deploy/entrypoint.sh" ]

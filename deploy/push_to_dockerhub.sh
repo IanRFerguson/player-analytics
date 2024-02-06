@@ -5,9 +5,9 @@ STAGE=$2
 
 if [ $STAGE == "--prod" ]; then
     echo "Using production image..."
-    DOCKERFILE="deploy/Dockerfile.dev"
-else
     DOCKERFILE="deploy/Dockerfile.prod"
+else
+    DOCKERFILE="deploy/Dockerfile.dev"
 fi
 
 
