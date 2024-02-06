@@ -86,7 +86,7 @@ WITH
             {{ dbt_utils.generate_surrogate_key(["game_location", "player_id"]) }} AS player_home_away_id
 
         FROM players
-        JOIN games ON players.game_id = games.game_id
+        INNER JOIN games ON players.game_id = games.game_id
         GROUP BY
             game_location,
             player_id,

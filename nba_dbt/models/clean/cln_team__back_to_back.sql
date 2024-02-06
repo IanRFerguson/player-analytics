@@ -15,7 +15,7 @@ WITH
             ROUND(AVG(steals), 2) AS avg_steals,
             ROUND(AVG(blocks), 2) AS avg_blocks,
             ROUND(AVG(turnovers), 2) AS avg_turnovers,
-            ROUND(AVG(personal_fouls), 2) AS avg_personal_fouls,
+            ROUND(AVG(personal_fouls), 2) AS avg_personal_fouls
 
         FROM {{ ref("stg_team__game_log") }}
         GROUP BY

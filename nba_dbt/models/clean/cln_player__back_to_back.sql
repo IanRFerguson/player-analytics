@@ -83,7 +83,7 @@ WITH
             {{ dbt_utils.generate_surrogate_key(["is_back_to_back", "player_id"]) }} AS player_back_to_back_id
 
         FROM players
-        JOIN games ON players.game_id = games.game_id
+        INNER JOIN games ON players.game_id = games.game_id
         GROUP BY
             is_back_to_back,
             player_id,

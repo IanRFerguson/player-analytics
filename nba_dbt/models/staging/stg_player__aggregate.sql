@@ -150,9 +150,9 @@ WITH
 
 
         FROM traditional
-        JOIN scoring USING(player__id, game_id)
-        JOIN player_track USING(player__id, game_id)
-        JOIN advanced USING(player__id, game_id)
+        INNER JOIN scoring USING(player__id, game_id)
+        INNER JOIN player_track USING(player__id, game_id)
+        INNER JOIN advanced USING(player__id, game_id)
     )
 
 SELECT * FROM base

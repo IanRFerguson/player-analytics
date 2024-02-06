@@ -23,7 +23,7 @@ WITH
             touches,
             passes,
             contested_field_goals__made
-            contested_field_goals__attempted,
+                AS contested_field_goals__attempted,
             contested_field_goals__percentage,
             uncontested_field_goals__made,
             uncontested_field_goals__attempted,
