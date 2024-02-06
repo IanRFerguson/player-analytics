@@ -26,6 +26,9 @@ models:
     clean:
       +materialized: table
       +schema: _clean
+    player_summaries:
+      +materialized: view
+      +schema: _clean
 
 vars:
   db_name: nba-player-analytics

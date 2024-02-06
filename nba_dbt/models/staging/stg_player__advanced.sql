@@ -5,7 +5,7 @@ WITH
 
             *,
             CASE
-                WHEN player__comment LIKE '%DNP%' or player__comment LIKE '%DND%' THEN '0:0'
+                WHEN player__comment LIKE '%DNP%' OR player__comment LIKE '%DND%' THEN '0:0'
                 ELSE minutes
             END AS game_minutes,
             'ADVANCED' AS _model

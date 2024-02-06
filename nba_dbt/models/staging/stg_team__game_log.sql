@@ -10,10 +10,10 @@ WITH
                 WHEN LOWER(matchup) LIKE '%@%' THEN 'AWAY'
                 ELSE NULL
             END AS game_location,
-            {{ matchup_opponent('matchup' )}} AS opponent,
+            {{ matchup_opponent('matchup' ) }} AS opponent,
             {{ dbt_utils.generate_surrogate_key(["team_id", "game_id", "matchup"]) }} AS game_log_unique_id
 
-         FROM {{ ref("base_team__game_log") }}
+        FROM {{ ref("base_team__game_log") }}
     ),
 
     game_metadata AS (
@@ -48,7 +48,7 @@ WITH
             CASE
                 WHEN outcome__win_loss = 'W' THEN 1
                 WHEN outcome__win_loss = 'L' THEN 0
-                ELSE null
+                ELSE NULL
             END AS outcome__bin,
             outcome__net_wins,
             outcome__net_losses,
