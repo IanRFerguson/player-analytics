@@ -6,7 +6,7 @@ from utilities.json_helpers import load_config
 
 ##########
 
-# FIXME - This still isn't working
+
 def authenticate(api_key: str, workspace: str):
     """
     WIP - Runs `prefect cloud login` command to authenticate program

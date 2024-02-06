@@ -2,7 +2,7 @@ from dotenv import load_dotenv
 import os
 from utilities.logger import logger
 
-#####
+###########
 
 
 def set_dataset(testing: bool, default_dataset: str):
@@ -45,6 +45,7 @@ def set_environment():
     load_dotenv(dotenv_path=env_path)
     set_service_account_absolute_path()
 
+#####
 
 if __name__ == "__main__":
     logger.setLevel(level=10)

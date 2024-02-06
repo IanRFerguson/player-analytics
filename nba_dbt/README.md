@@ -1,15 +1,10 @@
-Welcome to your new dbt project!
+# nba_dbt
 
-### Using the starter project
+Lightweight `dbt` workflow to pull raw data through a few transformations and aggregations.
 
-Try running the following commands:
-- dbt run
-- dbt test
+## Model Hierarchy
 
-
-### Resources:
-- Learn more about dbt [in the docs](https://docs.getdbt.com/docs/introduction)
-- Check out [Discourse](https://discourse.getdbt.com/) for commonly asked questions and answers
-- Join the [chat](https://community.getdbt.com/) on Slack for live discussions and support
-- Find [dbt events](https://events.getdbt.com) near you
-- Check out [the blog](https://blog.getdbt.com/) for the latest news on dbt's development and best practices
+* `base/` - These are views that pull the raw data from the API into `dbt`
+* `staging/` - The bulk of our transformations occur here; renaming fields, updating data types, etc.
+* `clean/` - We get a little fancy here, e.g., opponent splits, back to back splits
+* `player_summaries/` - These are views of each player's performance, and end up being written to the `_clean` schema

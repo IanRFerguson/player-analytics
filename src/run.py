@@ -11,9 +11,7 @@ from utilities.bigquery import BigQuery
 
 
 @flow(name="nba-player-analytics")
-def kickoff(
-    full_refresh: bool, dataset: str, testing: bool, team_id: str
-):
+def kickoff(full_refresh: bool, dataset: str, testing: bool, team_id: str):
     bq = BigQuery(service_credentials=os.environ["GCP_CREDS"])
     successful_run = run_api(
         bq=bq,
@@ -27,9 +25,7 @@ def kickoff(
 
 
 @task
-def run_api(
-    bq: BigQuery, full_refresh: bool, dataset: str, team_id: str
-):
+def run_api(bq: BigQuery, full_refresh: bool, dataset: str, team_id: str):
     return get_all_boxscore_data(
         bq=bq,
         full_refresh=full_refresh,

@@ -81,7 +81,7 @@ def get_all_boxscore_data(
             error_manifest=all_errors,
             dataset=dataset,
             log_table=log_table,
-            team_id=team_id
+            team_id=team_id,
         )
 
     if all_errors:
