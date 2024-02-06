@@ -8,7 +8,7 @@ terraform {
 }
 
 provider "google" {
-  credentials = file("../service_accounts/nba-player-analytics-4153526c6e83.json")
+  credentials = file("../service_accounts/nba-player-analytics-service.json")
 
   project = "nba-player-analytics"
   region  = "us"

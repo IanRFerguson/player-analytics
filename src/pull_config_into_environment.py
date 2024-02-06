@@ -45,7 +45,7 @@ def main(bq: BigQuery, variables: list = [], save_locally: bool = False):
 
 if __name__ == "__main__":
     # TODO - Make this abstract
-    service_creds = "./service_accounts/nba-player-analytics-4153526c6e83.json"
+    service_creds = "./service_accounts/nba-player-analytics-service.json"
     if not os.environ.get("GCP_CREDS"):
         logger.info("Manually setting environment var...")
         os.environ["GCP_CREDS"] = service_creds
