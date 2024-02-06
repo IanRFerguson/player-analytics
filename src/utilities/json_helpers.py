@@ -10,6 +10,6 @@ def save_config(config_object: dict, path: str = LOCAL_CONFIG_PATH):
         json.dump(config_object, out_)
 
 
-def load_config(path: str = LOCAL_CONFIG_PATH):
+def load_config(path: str = LOCAL_CONFIG_PATH) -> dict:
     with open(path) as in_:
         return json.load(in_)

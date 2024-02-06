@@ -53,4 +53,4 @@ if __name__ == "__main__":
     # Instantiate BigQuery client
     bq = BigQuery(service_credentials=os.environ["GCP_CREDS"])
 
-    main(bq=bq)
+    main(bq=bq, save_locally=True)

@@ -29,7 +29,6 @@ def get_game_metadata(team_id: str):
 def get_all_boxscore_data(
     bq: BigQuery,
     dataset: str,
-    team_abbrevation: str,
     team_id: str,
     full_refresh: bool = False,
 ):
@@ -82,6 +81,7 @@ def get_all_boxscore_data(
             error_manifest=all_errors,
             dataset=dataset,
             log_table=log_table,
+            team_id=team_id
         )
 
     if all_errors:
