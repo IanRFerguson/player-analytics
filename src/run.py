@@ -83,6 +83,5 @@ if __name__ == "__main__":
                 "testing": TESTING,
                 "team_id": "1610612752",
             },
-            # cron="0 16 * * *",
-            interval=80,
+            cron="0 16 * * *",
         )
