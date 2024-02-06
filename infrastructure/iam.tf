@@ -1,10 +1,15 @@
+locals {
+  json_data = jsondecode(file("${path.module}/local.json"))
+}
+
+
 data "google_iam_policy" "owner" {
   binding {
     role = "roles/bigquery.dataOwner"
 
     members = [
-      "serviceAccount:${var.service_account_address}",
-      "user:${var.user_email_address}"
+      "serviceAccount:${local.json_data.SERVICE_ACCOUNT}",
+      "user:${local.json_data.USER_EMAIL}"
     ]
   }
 }
