@@ -15,7 +15,7 @@
         "editor.formatOnSave": false
     },
     "sqlfluff.experimental.format.executeInTerminal": true,
-    "sqlfluff.dialect": "redshift",
+    "sqlfluff.dialect": "bigquery",
     "sqlfluff.linter.run": "onSave",
     "sqlfluff.format.arguments": [
         "--FIX-EVEN-UNPARSABLE"
