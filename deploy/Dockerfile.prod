@@ -1,0 +1,12 @@
+FROM python:3.8
+
+COPY . /app/
+WORKDIR /app
+
+# For CloudRun purposes
+EXPOSE 8080
+
+RUN pip install -r requirements.txt
+RUN chmod +x deploy/entrypoint.sh
+
+CMD [ "bash", "deploy/entrypoint.sh" ]

@@ -1,4 +1,13 @@
 WITH
+    meta AS (
+        SELECT
+
+            *,
+            'PLAYER_TRACK' AS _model
+        
+        FROM {{ ref("base_player__player_track") }}
+    ),
+
     base AS (
         SELECT
 
@@ -14,7 +23,7 @@ WITH
             touches,
             passes,
             contested_field_goals__made
-            contested_field_goals__attempted,
+                AS contested_field_goals__attempted,
             contested_field_goals__percentage,
             uncontested_field_goals__made,
             uncontested_field_goals__attempted,
@@ -23,9 +32,9 @@ WITH
             defended_field_goals__made,
             defended_field_goals__attempted,
             defended_field_goals__percentage,
-            {{ dbt_utils.generate_surrogate_key(["game_id", "player__id"]) }} AS player_track_unique_id
+            {{ dbt_utils.generate_surrogate_key(["game_id", "player__id", "_model"]) }} AS player_track_unique_id
 
-        FROM {{ ref("base_player__player_track") }}
+        FROM meta
     )
 
 SELECT * FROM base

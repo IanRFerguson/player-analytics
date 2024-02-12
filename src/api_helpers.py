@@ -3,13 +3,13 @@ import datetime
 import pandas as pd
 from utilities.bigquery import BigQuery
 from nba_api.stats.endpoints.teamgamelog import TeamGameLog
-from config import RAW_BQ_DATASET, STAT_TABLE_CONFIG, NYK_ID, LOG_TABLE
+from config import STAT_TABLE_CONFIG, LOG_TABLE
 from utilities.logger import logger
 
 #####
 
 
-def get_game_metadata(team_id: str = NYK_ID):
+def get_game_metadata(team_id: str):
     """`
     Hits the NBA API and returns dataframe of all games that
     have already been played this season
@@ -28,8 +28,9 @@ def get_game_metadata(team_id: str = NYK_ID):
 
 def get_all_boxscore_data(
     bq: BigQuery,
+    dataset: str,
+    team_id: str,
     full_refresh: bool = False,
-    dataset: str = RAW_BQ_DATASET,
 ):
     """
     Retrives player data for a given date. If the Knicks
@@ -38,7 +39,7 @@ def get_all_boxscore_data(
     """
 
     log_table = f"{dataset}.{LOG_TABLE}"
-    all_game_metadata = get_game_metadata()
+    all_game_metadata = get_game_metadata(team_id=team_id)
     build_tables(
         data=all_game_metadata,
         raw_dataset=dataset,
@@ -80,6 +81,7 @@ def get_all_boxscore_data(
             error_manifest=all_errors,
             dataset=dataset,
             log_table=log_table,
+            team_id=team_id,
         )
 
     if all_errors:
@@ -113,7 +115,8 @@ def process(
     bq: BigQuery,
     error_manifest: list,
     log_table: str,
-    dataset: str = RAW_BQ_DATASET,
+    dataset: str,
+    team_id: str,
 ):
     """
     Iteratively hits stat-specific API endpoints and writes the responses
@@ -133,7 +136,7 @@ def process(
         try:
             # Use API to build dataframe
             data = endpoint(id_).get_data_frames()[0]
-            data = data[data[team_id_field].astype(str) == NYK_ID].reset_index(
+            data = data[data[team_id_field].astype(str) == team_id].reset_index(
                 drop=True
             )
 

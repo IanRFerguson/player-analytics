@@ -3,6 +3,10 @@ creds/
 venv/
 logs/
 .terraform/
+*terraform.tfstate.backup
+*ian_run_local*
+local_config.json
+
 
 ### File types
 *.pyc*
@@ -11,5 +15,6 @@ logs/
 *.env
 service_accounts/*.json
 *DS_Store*
-*tfstate*
 out
+*lock.info*
+infrastructure/local.json

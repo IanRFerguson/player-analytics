@@ -22,7 +22,7 @@ class BigQuery:
         location: Optional[str] = None,
     ):
         """
-        Lightweight wrapper to handle API calls to Google BigQuery
+        Lightweight API to send queries to Google BigQuery
         """
 
         self.__setup_creds(service_credentials)
@@ -41,7 +41,7 @@ class BigQuery:
     @property
     def client(self):
         """
-        TODO: fill this in
+        The little engine that could
         """
 
         if not self.__client:
@@ -53,7 +53,7 @@ class BigQuery:
 
     def query(self, sql: str, return_result: bool = True):
         """
-        Very basic API to run BigQuery SQL
+        Very basic API to execute SQL in BigQuery
         """
 
         query_job = self.client.query(query=sql)
@@ -105,7 +105,6 @@ class BigQuery:
         dataframe: DataFrame,
         table_name: str,
         if_exists: str,
-        force_data_types_to_strings: bool = True,
     ):
         """
         Writes a Pandas DataFrame to Google BigQuery

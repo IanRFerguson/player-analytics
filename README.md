@@ -4,63 +4,47 @@
 
 This analytics pipeline is composed of the following steps:
 
-* **EXTRACT**
-  * NBA Player Data is scraped and cleaned via Python
-  * This is orchestrated in Prefect to run on a cadence
-  * We want the following raw models
-    * Player stats per night
-    * Player stats on the season (averages)
-  
-* **LOAD**
-  * The resulting tabular data is loaded into `BigQuery` as a raw table
-  
-* **TRANSFORM**
-  * Data is aggregated and transofmred via `dbt`
-  * We want to represent the following as cleaned `dbt` models
-    * Team shooting percentages
-    * Team defensive rating vs. opponents
+* **EXTRACT** - Data is procured from the NBA's API (*see `src/api_helpers.py`*)
+* **LOAD** - Data is loaded into BigQuery via a custom wrapper (*see `src/utilities/bigquery.py`*)
+* **TRANSFORM** - Raw BigQuery data is cleaned and reshaped with `dbt` (*see `nba_dbt/`*)
 
-## Usage
+<img src=".local/DAG.png" width=75%>
 
-Set up the requisite GCP infrastructure with terraform:
+## Source Code
+
+You'll need a Google service account stored locally - `./service_accounts/nba-player-analytics-service.json` ... this is used by every service!
+
+### Infrastructure
+
+The core cloud infrastructure is managed via Terraform in the `infrastructure/` directory. Configuration, production and development datasets, a production Cloud Run service, and all the relevant IAM permissions are managed here. To run this locally, ensure you have a `infrastructure/local.json` file defined like:
 
 ```
-# Connect Terraform to your GCP instance
-cd infrastructure && terraform init
-
-# Assess modules to build
-terraform plan -out out
-
-# Build infrastructure
-terraform apply out
-
-cd ..
+{
+    "USER_EMAIL": "<FILL>",
+    "SERVICE_ACCOUNT": "<FILL>",
+    "DOCKER_IMAGE_NAME": "<FILL>"
+}
 ```
 
-Run this pipeline locally via Docker:
+### Deployment
 
-```
-docker compose up --build -d
-```
+You'll find production and development Dockerfiles in the `deploy/` directory. You can `docker compose up --build -d` from the root of this project to build the dev environment; I've included a shell script to open an interactive terminal to test things out.
 
-Once the container builds, you can run an interactive shell and execute the source code as you would at the command line on your own machine:
+The big difference here is that DEV sleeps infinitely, so it just sits idly and waits for a command. PROD runs a series of commands (defined in `deploy/entrypoint.sh`) to authenticate the shell and connect it to Prefect Cloud.
 
-```
-# Start interactive shell via Docker compose
-bash dev__interactive_shell.sh
-```
+### Extract + Load
 
-```
-# Run the main function "locally"
-python src/run.py --full-refresh --local
+This is all wrapped in `src/run.py`. There are optional CLI arguments to run this locally (outside the cloud context), with a debugger, fully refreshing the data, etc... see `src/utilities/cli.py` for a full list. 
 
-# Kick the main function off via Prefect
-python src/run.py
-```
+This project IS hardcoded to run Knicks data, because frankly that's all I cared to do!
 
-## Running Checklist
-- [x] Python API is successfully writing to BigQuery project 
-- [x] Clean dbt models (base + staging) are well defined and run without test failures
-- [ ] Summary dbt models accurately join tables together to offer insights about players and games
-- [ ] Prefect workflow set up to run on a daily cadence
-- [x] Core infrastructure is managed via Terraform
+### Transform
+
+All of the data transformations are handled by dbt - see `nba_dbt/README.md` for a quick mapping. Transformations happen in `staging/`, aggregations and splits happen in `clean/` and individual players are modeled in `player_summaries/`
+
+## Fun Next Steps
+
+* Pull this data into a React app to serve as a dashboard. Player dropdown, stat dropdown, all team stats, etc.
+* Train some simple ML models to predict team success as a factor of individual stats and conditions
+  * Team offensive rating when Jalen plays > 30 minutes?
+  * Defense against top-4 seeds when playing back to back games?

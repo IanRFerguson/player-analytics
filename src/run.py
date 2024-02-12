@@ -1,5 +1,4 @@
 import os
-import logging
 from prefect import flow, task
 from api_helpers import get_all_boxscore_data
 from dbt_helpers import build_dbt
@@ -7,23 +6,32 @@ from utilities.cli import cli
 from utilities.logger import logger
 from utilities.environment import set_dataset, set_environment
 from utilities.bigquery import BigQuery
-from config import RAW_BQ_DATASET
 
-#####
+##########
 
 
-@flow(log_prints=False)
-def kickoff(full_refresh: bool, dataset: str, testing: bool):
+@flow(name="nba-player-analytics")
+def kickoff(full_refresh: bool, dataset: str, testing: bool, team_id: str):
     bq = BigQuery(service_credentials=os.environ["GCP_CREDS"])
-    successful_run = run_api(bq=bq, full_refresh=full_refresh, dataset=dataset)
+    successful_run = run_api(
+        bq=bq,
+        full_refresh=full_refresh,
+        dataset=dataset,
+        team_id=team_id,
+    )
 
     if successful_run and not testing:
         run_dbt()
 
 
 @task
-def run_api(bq: BigQuery, full_refresh: bool, dataset: str = RAW_BQ_DATASET):
-    return get_all_boxscore_data(bq=bq, full_refresh=full_refresh, dataset=dataset)
+def run_api(bq: BigQuery, full_refresh: bool, dataset: str, team_id: str):
+    return get_all_boxscore_data(
+        bq=bq,
+        full_refresh=full_refresh,
+        dataset=dataset,
+        team_id=team_id,
+    )
 
 
 @task
@@ -42,32 +50,23 @@ if __name__ == "__main__":
     FULL_REFRESH = args_.full_refresh
     TESTING = args_.test
     DEBUG = args_.debug
-    DATASET = set_dataset(TESTING, default_dataset=RAW_BQ_DATASET)
+    DATASET = set_dataset(TESTING, default_dataset="raw__nyk_data")
 
     if DEBUG:
         logger.setLevel(level=10)
         logger.debug("Running logger in debug...")
-    else:
-        # If we're running the logger normally we don't really need all
-        # the logs we get from Parsons
-        logging.getLogger("parsons.google.google_cloud_storage").setLevel(level=30)
-
-    ###
-
-    logger.info("Running with the following config...")
-    config = {
-        "Local Run": LOCAL,
-        "Full Refresh": FULL_REFRESH,
-        "Testing": TESTING,
-        "Destination Dataset": DATASET,
-    }
-    logger.info(config)
 
     ###
 
     if LOCAL:
+        logger.debug(os.environ["GCP_CREDS"])
         bq = BigQuery(service_credentials=os.environ["GCP_CREDS"])
-        run_api.fn(bq=bq, full_refresh=FULL_REFRESH, dataset=DATASET)
+        run_api.fn(
+            bq=bq,
+            full_refresh=FULL_REFRESH,
+            dataset=DATASET,
+            team_id="1610612752",
+        )
         run_dbt.fn()
 
     else:
@@ -78,6 +77,7 @@ if __name__ == "__main__":
                 "full_refresh": FULL_REFRESH,
                 "dataset": DATASET,
                 "testing": TESTING,
+                "team_id": "1610612752",
             },
-            interval=6000,
+            cron="0 16 * * *",
         )
