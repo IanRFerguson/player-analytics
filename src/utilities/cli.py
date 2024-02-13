@@ -1,5 +1,6 @@
 import argparse
 
+
 def cli():
     """
     Handles command line arguments when executing `run.py`

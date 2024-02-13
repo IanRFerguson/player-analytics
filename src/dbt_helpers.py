@@ -39,15 +39,19 @@ def dbt_deps():
     subprocess.run(call_)
 
 
-def build_dbt(target: str = "path:models/base+"):
+def build_dbt(target: str = "path:models/base+", install_deps: bool = True):
     """
     Wraps `dbt` helpers - sets path, installs dependencies,
     and executes a target build
     """
 
     set_dbt_path()
-    dbt_deps()
+
+    if install_deps:
+        dbt_deps()
+
     dbt_models(target=target)
+
 
 #####
 
