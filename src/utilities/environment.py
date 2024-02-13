@@ -45,6 +45,7 @@ def set_environment():
     load_dotenv(dotenv_path=env_path)
     set_service_account_absolute_path()
 
+
 #####
 
 if __name__ == "__main__":

@@ -2,6 +2,7 @@ import os
 from prefect import flow, task
 from api_helpers import get_all_boxscore_data
 from dbt_helpers import build_dbt
+from player_summary_models import sync_player_summary_models
 from utilities.cli import cli
 from utilities.logger import logger
 from utilities.environment import set_dataset, set_environment
@@ -21,7 +22,8 @@ def kickoff(full_refresh: bool, dataset: str, testing: bool, team_id: str):
     )
 
     if successful_run and not testing:
-        run_dbt()
+        run_dbt_through_staging()
+        run_dbt_player_summaries(bq=bq)
 
 
 @task
@@ -35,8 +37,17 @@ def run_api(bq: BigQuery, full_refresh: bool, dataset: str, team_id: str):
 
 
 @task
-def run_dbt():
-    build_dbt()
+def run_dbt_through_staging():
+    build_dbt(target="+path:models/staging")
+
+
+@task
+def run_dbt_player_summaries(bq: BigQuery):
+    player_summary_path = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "../nba_dbt/models/player_summaries")
+    )
+    sync_player_summary_models(bq=bq, path_to_dbt_subdirectory=player_summary_path)
+    build_dbt(target="path:models/player_summaries", install_deps=False)
 
 
 #####
@@ -61,13 +72,14 @@ if __name__ == "__main__":
     if LOCAL:
         logger.debug(os.environ["GCP_CREDS"])
         bq = BigQuery(service_credentials=os.environ["GCP_CREDS"])
-        run_api.fn(
-            bq=bq,
-            full_refresh=FULL_REFRESH,
-            dataset=DATASET,
-            team_id="1610612752",
-        )
-        run_dbt.fn()
+        # run_api.fn(
+        #     bq=bq,
+        #     full_refresh=FULL_REFRESH,
+        #     dataset=DATASET,
+        #     team_id="1610612752",
+        # )
+        # run_dbt_through_staging.fn()
+        run_dbt_player_summaries.fn(bq=bq)
 
     else:
         kickoff.serve(
