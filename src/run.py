@@ -72,13 +72,13 @@ if __name__ == "__main__":
     if LOCAL:
         logger.debug(os.environ["GCP_CREDS"])
         bq = BigQuery(service_credentials=os.environ["GCP_CREDS"])
-        # run_api.fn(
-        #     bq=bq,
-        #     full_refresh=FULL_REFRESH,
-        #     dataset=DATASET,
-        #     team_id="1610612752",
-        # )
-        # run_dbt_through_staging.fn()
+        run_api.fn(
+            bq=bq,
+            full_refresh=FULL_REFRESH,
+            dataset=DATASET,
+            team_id="1610612752",
+        )
+        run_dbt_through_staging.fn()
         run_dbt_player_summaries.fn(bq=bq)
 
     else:
