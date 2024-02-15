@@ -12,7 +12,7 @@ def set_dbt_path():
     """
 
     here_ = os.path.dirname(__file__)
-    dbt_path = os.path.join(here_, "../nba_dbt")
+    dbt_path = os.path.abspath(os.path.join(here_, "../nba_dbt"))
     os.chdir(dbt_path)
 
 
@@ -39,7 +39,10 @@ def dbt_deps():
     subprocess.run(call_)
 
 
-def build_dbt(target: str = "path:models/base+", install_deps: bool = True):
+def build_dbt(
+    target: str = "path:models/base+",
+    install_deps: bool = True,
+):
     """
     Wraps `dbt` helpers - sets path, installs dependencies,
     and executes a target build

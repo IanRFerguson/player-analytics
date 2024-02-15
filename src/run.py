@@ -43,10 +43,18 @@ def run_dbt_through_staging():
 
 @task
 def run_dbt_player_summaries(bq: BigQuery):
+    # TODO - Hackier than I'd like, this let's two dbt runs occur one after another
+    os.chdir("/app")
+
+    # Set system path to summary models
     player_summary_path = os.path.abspath(
         os.path.join(os.path.dirname(__file__), "../nba_dbt/models/player_summaries")
     )
+
+    # Create .sql files if they don't exist
     sync_player_summary_models(bq=bq, path_to_dbt_subdirectory=player_summary_path)
+
+    # Run player summary models
     build_dbt(target="path:models/player_summaries", install_deps=False)
 
 
