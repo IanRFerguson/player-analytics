@@ -1,0 +1,9 @@
+[project]
+name = "player-analytics"
+version = "0.1.0"
+description = "This is a full stack analytics project to model and display Knicks player data."
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "dlt[bigquery]>=1.25.0",
+]
