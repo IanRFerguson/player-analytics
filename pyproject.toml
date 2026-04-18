@@ -5,9 +5,11 @@ description = "This is a full stack analytics project to model and display Knick
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
+    "backoff>=2.2.1",
     "click>=8.3.2",
     "colorlog>=6.10.1",
     "dlt[bigquery]>=1.25.0",
+    "google-cloud-bigquery-storage>=2.37.0",
     "pydantic>=2.13.1",
 ]
 

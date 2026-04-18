@@ -2,7 +2,7 @@
 creds/
 venv/
 logs/
-.terraform/
+.terraform*
 *terraform.tfstate.backup
 *ian_run_local*
 local_config.json

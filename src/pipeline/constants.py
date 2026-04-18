@@ -12,5 +12,3 @@ class RuntimeConfig(BaseModel):
     # NOTE: This is the team ID for the New York Knicks in the balldontlie API.
     # You can change this to analyze a different team.
     team_id: int = 20
-
-    destination_schema: str

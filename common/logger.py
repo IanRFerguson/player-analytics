@@ -26,6 +26,7 @@ _handler.setFormatter(_formatter)
 pipeline_logger.addHandler(_handler)
 pipeline_logger.setLevel("INFO")
 
-if os.environ.get("DEBUG") == "true":
+
+if os.environ.get("DEBUG_LOG") == "true":
     pipeline_logger.setLevel("DEBUG")
     pipeline_logger.debug("Logging at debug level")
